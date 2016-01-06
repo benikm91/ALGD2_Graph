@@ -8,26 +8,31 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * General abstract implementation for different Graph implementations in the hambbe.graph library.
+ * @param <V> Type of value in vertex
+ */
 public abstract class Graph<V> implements IGraph<V> {
 
     protected final List<Vertex> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
 
     protected abstract double getValue(AbstractEdge e);
 
-    public AbstractEdge[] bellman(final Item pFrom, final Item pTo) {
-        checkMembership(pFrom, pTo);
-        final Vertex from = (Vertex) pFrom;
-        final Vertex to = (Vertex) pTo;
-        return null; //TODO implement.
-    }
-
-    protected Path graphSearch(PriorityQueue<Path> pq, Vertex goal) {
+    /**
+     * Helper function for different graph search implementations.
+     * @param from Vertex we are starting at.
+     * @param pq Initialized priority queue.
+     * @param to Vertex we are looking for.
+     * @return Path to vertex, if exists. Null, otherwise.
+     */
+    protected Path graphSearch(Vertex from, PriorityQueue<Path> pq, Vertex to) {
+        from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
         Path result = null;
         while (!pq.isEmpty() && result == null) {
             final Path p = pq.poll();
             Vertex next = (Vertex) p.step.goal;
             if (next.isMarked()) continue;
-            if (next == goal) result = p;
+            if (next == to) result = p;
             else {
                 next.mark();
                 next.edges.forEach(e -> new Path(p, e, getValue(e)));
@@ -40,6 +45,59 @@ public abstract class Graph<V> implements IGraph<V> {
         return result;
     }
 
+    /**
+     *
+     * @param pFrom Item we are starting at.
+     * @param pTo Item we are looking for.
+     * @return
+     */
+    public AbstractEdge[] bellman(final Item pFrom, final Item pTo) {
+        checkMembership(pFrom, pTo);
+        final Vertex from = (Vertex) pFrom;
+        final Vertex to = (Vertex) pTo;
+        return null; //TODO implement.
+    }
+
+    /**
+     * Greedy search algorithm implementation.
+     *
+     * It finds an existing path.
+     * It does not guarantee the optimal path.
+     *
+     * @param pFrom Item we are starting at.
+     * @param pTo Item we are looking for.
+     * @param heuristic Heuristic function for prioritizing items.
+     * @return Path to item, if exists. Null, otherwise.
+     */
+    public Path greedySearch(final Item pFrom, final Item pTo, final Function<V, Double> heuristic) {
+        checkMembership(pFrom, pTo);
+        final Vertex from = (Vertex) pFrom;
+        final Vertex to = (Vertex) pTo;
+        final Function<Path, Double> greedy = (p) -> heuristic.apply(((Vertex) p.getCurrent()).value);
+        final PriorityQueue<Path> pq = new PriorityQueue<>(
+                (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
+        return graphSearch(from, pq, to);
+    }
+
+    /**
+     * A* search algorithm implementation.
+     *
+     * It finds an existing path.
+     * It finds the optimal path (if rules below are full filled).
+     * It won't look at any path which costs are higher than the optimal one (if rules below are full filled).
+     *
+     *
+     * Rules to work:
+     * <ul>
+     * <li>All step costs have to be positive.
+     * <li>Heuristic must not overestimate costs.
+     * </ul>
+     *
+     * @param pFrom Item we are starting at.
+     * @param pTo Item we are looking for.
+     * @param heuristic Heuristic function for helping to prioritize items.
+     * @return Path to item, if exists. Null, otherwise.
+     */
     public Path aStar(final Item pFrom, final Item pTo, final Function<V, Double> heuristic) {
         checkMembership(pFrom, pTo);
         final Vertex from = (Vertex) pFrom;
@@ -47,17 +105,30 @@ public abstract class Graph<V> implements IGraph<V> {
         final Function<Path, Double> assumedTotalCost = (p) -> p.totalCost + heuristic.apply(((Vertex) p.getCurrent()).value);
         final PriorityQueue<Path> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
-        from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
-        return graphSearch(pq, to);
+        return graphSearch(from, pq, to);
     }
 
+    /**
+     * Dijkstra algorithm implementation.
+     *
+     * It finds an existing path.
+     * It finds the optimal path (if rules below are full filled).
+     *
+     * Rules to work:
+     * <ul>
+     * <li>All step costs have to be positive.
+     * </ul>
+     *
+     * @param pFrom Item we are starting at.
+     * @param pTo Item we are looking for.
+     * @return Path to item, if exists. Null, otherwise.
+     */
     public Path dijkstra(final Item pFrom, final Item pTo) {
         checkMembership(pFrom, pTo);
         final Vertex from = (Vertex) pFrom;
         final Vertex to = (Vertex) pTo;
         final PriorityQueue<Path> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
-        from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
-        return graphSearch(pq, to);
+        return graphSearch(from, pq, to);
     }
 
     @Override
@@ -67,6 +138,10 @@ public abstract class Graph<V> implements IGraph<V> {
         return v;
     }
 
+    /**
+     * Check if item is element of this graph. Throws an {@link IllegalArgumentException} if not.
+     * @param item Item to check
+     */
     protected void checkMembership(Item item) {
         if (!(item instanceof GenericGraph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
         Vertex v = (Vertex) item;
@@ -74,6 +149,10 @@ public abstract class Graph<V> implements IGraph<V> {
 
     }
 
+    /**
+     * Calls {@link #checkMembership(Item)} for all items.
+     * @param items Items to check.
+     */
     protected void checkMembership(Item... items) {
         for (Item item : items) {
             checkMembership(item);
