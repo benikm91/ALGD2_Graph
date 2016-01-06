@@ -6,12 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Function;
 
 public abstract class Graph<V> implements IGraph<V> {
 
     protected final List<Vertex> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
 
-    protected abstract int getValue(AbstractEdge e);
+    protected abstract double getValue(AbstractEdge e);
 
     public AbstractEdge[] bellman(final Item pFrom, final Item pTo) {
         checkMembership(pFrom, pTo);
@@ -20,23 +21,43 @@ public abstract class Graph<V> implements IGraph<V> {
         return null; //TODO implement.
     }
 
+    protected Path graphSearch(PriorityQueue<Path> pq, Vertex goal) {
+        Path result = null;
+        while (!pq.isEmpty() && result == null) {
+            final Path p = pq.poll();
+            Vertex next = (Vertex) p.step.goal;
+            if (next.isMarked()) continue;
+            if (next == goal) result = p;
+            else {
+                next.mark();
+                next.edges.forEach(e -> new Path(p, e, getValue(e)));
+            }
+        }
+        this.vertexes.forEach(Vertex::demark);
+        while (result.pre != null) {
+            result = result.pre;
+        }
+        return result;
+    }
+
+    public Path aStar(final Item pFrom, final Item pTo, final Function<V, Double> heuristic) {
+        checkMembership(pFrom, pTo);
+        final Vertex from = (Vertex) pFrom;
+        final Vertex to = (Vertex) pTo;
+        final Function<Path, Double> assumedTotalCost = (p) -> p.totalCost + heuristic.apply(((Vertex) p.getCurrent()).value);
+        final PriorityQueue<Path> pq = new PriorityQueue<>(
+                (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
+        from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
+        return graphSearch(pq, to);
+    }
+
     public Path dijkstra(final Item pFrom, final Item pTo) {
         checkMembership(pFrom, pTo);
         final Vertex from = (Vertex) pFrom;
         final Vertex to = (Vertex) pTo;
-        final PriorityQueue<Path> pq = new PriorityQueue<>((p1, p2) -> Integer.compare(p1.cost, p2.cost));
-        from.edges.forEach(e -> new Path(null, e.goal, getValue(e)));
-        Path result = null;
-        while (!pq.isEmpty() && result != null) {
-            final Path p = pq.poll();
-            Vertex next = (Vertex) p.to;
-            if (next.isMarked()) continue;
-            if (next == to) result = p;
-            next.mark();
-            next.edges.forEach(e -> new Path(null, e.goal, getValue(e) + p.cost));
-        }
-        this.vertexes.forEach(Vertex::demark);
-        return result;
+        final PriorityQueue<Path> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
+        from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
+        return graphSearch(pq, to);
     }
 
     @Override
@@ -60,21 +81,25 @@ public abstract class Graph<V> implements IGraph<V> {
     }
 
     public static class Path {
-        public final Item from;
-        public final Item to;
-        public final int cost;
+        public final Path pre;
+        public final AbstractEdge step;
+        public final double totalCost;
 
-        public Path(Item from, Item to, int cost) {
-            this.from = from;
-            this.to = to;
-            this.cost = cost;
+        public Path(Path pre, AbstractEdge step, double cost) {
+            this.pre = pre;
+            this.step = step;
+            this.totalCost = ((pre == null) ? 0 : pre.totalCost) + cost;
+        }
+
+        public Item getCurrent() {
+            return pre.step.goal;
         }
     }
 
-    protected abstract class AbstractEdge {
-        protected final Vertex goal;
+    public static abstract class AbstractEdge {
+        protected final Item goal;
 
-        public AbstractEdge(Vertex goal) {
+        public AbstractEdge(Item goal) {
             this.goal = goal;
         }
     }
