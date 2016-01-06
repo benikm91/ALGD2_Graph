@@ -35,7 +35,7 @@ public abstract class Graph<V> implements IGraph<V> {
             next.mark();
             next.edges.forEach(e -> new Path(null, e.goal, getValue(e) + p.cost));
         }
-        this.vertexes.forEach(Vertex::unmark);
+        this.vertexes.forEach(Vertex::demark);
         return result;
     }
 
@@ -114,7 +114,7 @@ public abstract class Graph<V> implements IGraph<V> {
             return this.marked;
         }
 
-        public void unmark() {
+        public void demark() {
             this.setMarked((byte) 0);
         }
 
