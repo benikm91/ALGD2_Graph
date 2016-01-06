@@ -83,6 +83,11 @@ public abstract class Graph<V> implements IGraph<V> {
 
         protected final Graph graph;
         protected final V value;
+
+        /**
+         * Helper variable for marking the vertex with extra info (like visited).
+         * Byte was chosen, so different info can be stored and it needs also 1 byte of storage (same as boolean).
+         */
         protected byte marked = 0;
 
         /** adjacency list */
