@@ -26,19 +26,17 @@ public abstract class Graph<V> implements IGraph<V> {
         final Vertex to = (Vertex) pTo;
         final PriorityQueue<Path> pq = new PriorityQueue<>((p1, p2) -> Integer.compare(p1.cost, p2.cost));
         from.edges.forEach(e -> new Path(null, e.goal, getValue(e)));
-        Path p = null;
-        Vertex next;
-        while (!pq.isEmpty()) {
-            p = pq.poll();
-            next = (Vertex) p.to;
+        Path result = null;
+        while (!pq.isEmpty() && result != null) {
+            final Path p = pq.poll();
+            Vertex next = (Vertex) p.to;
             if (next.isMarked()) continue;
-            if (next == to) break;
+            if (next == to) result = p;
             next.mark();
-            final Path lp = p;
-            next.edges.forEach(e -> new Path(null, e.goal, getValue(e) + lp.cost));
+            next.edges.forEach(e -> new Path(null, e.goal, getValue(e) + p.cost));
         }
         this.vertexes.forEach(Vertex::unmark);
-        return p;
+        return result;
     }
 
     @Override
