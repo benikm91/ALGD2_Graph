@@ -1,11 +1,6 @@
 package com.hambbe.graph;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -47,16 +42,74 @@ public abstract class Graph<V> implements IGraph<V> {
 
     /**
      *
-     * @param pFrom Item we are starting at.
-     * @param pTo Item we are looking for.
+     * @param pFrom Stating item
+     * @param pTo Goal Item
      * @return
      */
-    public AbstractEdge[] bellman(final Item pFrom, final Item pTo) {
+    public List<Path> bellmanFord(final Item pFrom, final Item pTo)
+    {
         checkMembership(pFrom, pTo);
-        final Vertex from = (Vertex) pFrom;
         final Vertex to = (Vertex) pTo;
-        return null; //TODO implement.
+
+        HashMap<Item, Path> V = bellmanFord(pFrom);
+
+        // Return null if the bellman-ford algorithm wasn't successful
+        if (V == null) {
+            return null;
+        }
+
+        // Return null if the goal is unreachable from the given start item
+        if (V.get(pTo).totalCost == Double.MAX_VALUE) {
+            return null;
+        }
+
+        LinkedList<Path> route = new LinkedList<>();
+
+        // Prepare Path to return
+        for (Path curr = V.get(pTo); curr != null; curr = V.get(curr).pre) {
+            route.addFirst(curr);
+        }
+        return route;
     }
+
+    /**
+     * Runtime complexity: O(|V|*|E|)
+     *
+     * @param pFrom Item we are starting at.
+     * @return
+     */
+    public HashMap<Item, Path> bellmanFord(final Item pFrom) {
+        checkMembership(pFrom);
+        final Vertex from = (Vertex) pFrom;
+
+        HashMap<Item, Path> V = new HashMap<>();
+        vertexes.forEach(v -> V.put(v, new Path(null, null, (from == v) ? 0 : Double.MAX_VALUE)));
+
+        for (int i = 0; i < vertexes.size() - 1; i++) {
+            for (Vertex vx : vertexes) {
+                for (AbstractEdge e : vx.edges) {
+                    Path u = V.get(vx);
+                    Path v = V.get(e.goal);
+                    if (u.totalCost + getValue(e) < v.totalCost) {
+                        V.put(e.goal, new Path(u, e, u.totalCost + getValue(e)));
+                    }
+                }
+            }
+        }
+
+        for (Vertex vx : vertexes) {
+            for (AbstractEdge e : vx.edges) {
+                Path u = V.get(vx);
+                Path v = V.get(e.goal);
+                if (u.totalCost + getValue(e) < v.totalCost) {
+                    return null;
+                }
+            }
+        }
+
+        return V;
+    }
+
 
     /**
      * Greedy search algorithm implementation.
@@ -176,7 +229,7 @@ public abstract class Graph<V> implements IGraph<V> {
     }
 
     public static abstract class AbstractEdge {
-        protected final Item goal;
+        protected final Item goal; // TODO: type Vertex not better here?
 
         public AbstractEdge(Item goal) {
             this.goal = goal;
