@@ -15,32 +15,37 @@ public abstract class Graph<V> implements IGraph<V> {
 
     /**
      * Helper function for different graph search implementations.
-     * @param from Vertex we are starting at.
+     * @param pFrom Vertex we are starting at.
      * @param pq Initialized priority queue.
-     * @param to Vertex we are looking for.
-     * @return Path to vertex, if exists. Null, otherwise.
+     * @param pTo Vertex we are looking for.
+     * @return Route to vertex, if exists. Null, otherwise.
      */
-    protected Path graphSearch(Vertex from, PriorityQueue<Path> pq, Vertex to) {
-        if (from == to) return new Path(null, null, 0);
-        from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
-        Path result = null;
+    protected List<Step> graphSearch(Item pFrom, PriorityQueue<Step> pq, Item pTo) {
+        final Vertex from = (Vertex) pFrom;
+        final Vertex to = (Vertex) pTo;
+        if (from == to) return new LinkedList<>();
+        from.edges.forEach(e -> pq.add(new Step(null, e, getValue(e))));
+        Step result = null;
         while (!pq.isEmpty() && result == null) {
-            final Path p = pq.poll();
+            final Step p = pq.poll();
             Vertex next = (Vertex) p.step.goal;
             if (next.isMarked()) continue;
             if (next == to) {
                 result = p;
             } else {
                 next.mark();
-                next.edges.forEach(e -> pq.add(new Path(p, e, getValue(e))));
+                next.edges.forEach(e -> pq.add(new Step(p, e, getValue(e))));
             }
         }
         this.vertexes.forEach(Vertex::demark);
         if (result == null) return null;
-        while (result.pre != null) {
-            result = result.pre;
+
+        // Build route between start and goal item
+        LinkedList<Step> route = new LinkedList<>();
+        for (Step prev = result; prev != null; prev = prev.prev) {
+            route.addFirst(prev);
         }
-        return result;
+        return route;
     }
 
     /**
@@ -49,10 +54,10 @@ public abstract class Graph<V> implements IGraph<V> {
      * @param pTo Goal Item
      * @return
      */
-    public List<Path> bellmanFord(final Item pFrom, final Item pTo)
+    public List<Step> bellmanFord(final Item pFrom, final Item pTo)
     {
         checkMembership(pFrom, pTo);
-        HashMap<Item, Path> V = bellmanFord(pFrom);
+        HashMap<Item, Step> V = bellmanFord(pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
         if (V == null) {
@@ -65,8 +70,8 @@ public abstract class Graph<V> implements IGraph<V> {
         }
 
         // Build route between start and goal item
-        LinkedList<Path> route = new LinkedList<>();
-        for (Path curr = V.get(pTo); curr != null; curr = V.get(curr).pre) {
+        LinkedList<Step> route = new LinkedList<>();
+        for (Step curr = V.get(pTo); curr != null; curr = V.get(curr).prev) { //TODO V.get(curr) = curr?
             route.addFirst(curr);
         }
         return route;
@@ -75,23 +80,23 @@ public abstract class Graph<V> implements IGraph<V> {
     /**
      * Runtime complexity: O(|V|*|E|)
      *
-     * @param pFrom Item we are starting at.
+     * @param pFrom Start item.
      * @return
      */
-    public HashMap<Item, Path> bellmanFord(final Item pFrom) {
+    public HashMap<Item, Step> bellmanFord(final Item pFrom) {
         checkMembership(pFrom);
         final Vertex from = (Vertex) pFrom;
 
-        HashMap<Item, Path> V = new HashMap<>();
-        vertexes.forEach(v -> V.put(v, new Path(null, null, (from == v) ? 0 : Double.MAX_VALUE)));
+        HashMap<Item, Step> V = new HashMap<>();
+        vertexes.forEach(v -> V.put(v, new Step(null, null, (from == v) ? 0 : Double.MAX_VALUE)));
 
         for (int i = 0; i < vertexes.size() - 1; i++) {
             for (Vertex vx : vertexes) {
                 for (AbstractEdge e : vx.edges) {
-                    Path u = V.get(vx);
-                    Path v = V.get(e.goal);
+                    Step u = V.get(vx);
+                    Step v = V.get(e.goal);
                     if (u.totalCost + getValue(e) < v.totalCost) {
-                        V.put(e.goal, new Path(u, e, u.totalCost + getValue(e)));
+                        V.put(e.goal, new Step(u, e, u.totalCost + getValue(e)));
                     }
                 }
             }
@@ -99,8 +104,8 @@ public abstract class Graph<V> implements IGraph<V> {
 
         for (Vertex vx : vertexes) {
             for (AbstractEdge e : vx.edges) {
-                Path u = V.get(vx);
-                Path v = V.get(e.goal);
+                Step u = V.get(vx);
+                Step v = V.get(e.goal);
                 if (u.totalCost + getValue(e) < v.totalCost) {
                     return null;
                 }
@@ -117,17 +122,15 @@ public abstract class Graph<V> implements IGraph<V> {
      * It finds an existing path.
      * It does not guarantee the optimal path.
      *
-     * @param pFrom Item we are starting at.
-     * @param pTo Item we are looking for.
+     * @param from Start item.
+     * @param to Goal item.
      * @param heuristic Heuristic function for prioritizing items.
-     * @return Path to item, if exists. Null, otherwise.
+     * @return Route to item, if exists. Null, otherwise.
      */
-    public Path greedySearch(final Item pFrom, final Item pTo, final Function<V, Double> heuristic) {
-        checkMembership(pFrom, pTo);
-        final Vertex from = (Vertex) pFrom;
-        final Vertex to = (Vertex) pTo;
-        final Function<Path, Double> greedy = (p) -> heuristic.apply(((Vertex) p.getCurrent()).value);
-        final PriorityQueue<Path> pq = new PriorityQueue<>(
+    public List<Step> greedySearch(final Item from, final Item to, final Function<V, Double> heuristic) {
+        checkMembership(from, to);
+        final Function<Step, Double> greedy = (p) -> heuristic.apply(((Vertex) p.getCurrent()).value);
+        final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
         return graphSearch(from, pq, to);
     }
@@ -146,19 +149,17 @@ public abstract class Graph<V> implements IGraph<V> {
      * <li>Heuristic must not overestimate costs.
      * </ul>
      *
-     * @param pFrom Item we are starting at.
-     * @param pTo Item we are looking for.
+     * @param from Start item.
+     * @param to Goal item.
      * @param heuristic Heuristic function for helping to prioritize items.
-     * @return Path to item, if exists. Null, otherwise.
+     * @return Route to item, if exists. Null, otherwise.
      */
-    public Path aStar(final Item pFrom, final Item pTo, final Function<V, Double> heuristic) {
-        checkMembership(pFrom, pTo);
-        final Vertex from = (Vertex) pFrom;
-        final Vertex to = (Vertex) pTo;
-        final Function<Path, Double> assumedTotalCost = (p) ->
+    public List<Step> aStar(final Item from, final Item to, final Function<V, Double> heuristic) {
+        checkMembership(from, to);
+        final Function<Step, Double> assumedTotalCost = (p) ->
              p.totalCost
              + ((p.getCurrent() == null) ? 0 : heuristic.apply(((Vertex) p.getCurrent()).value));
-        final PriorityQueue<Path> pq = new PriorityQueue<>(
+        final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
         return graphSearch(from, pq, to);
     }
@@ -174,15 +175,13 @@ public abstract class Graph<V> implements IGraph<V> {
      * <li>All step costs have to be positive.
      * </ul>
      *
-     * @param pFrom Item we are starting at.
-     * @param pTo Item we are looking for.
-     * @return Path to item, if exists. Null, otherwise.
+     * @param from Start item.
+     * @param to Goal item.
+     * @return Route to item, if exists. Null, otherwise.
      */
-    public Path dijkstra(final Item pFrom, final Item pTo) {
-        checkMembership(pFrom, pTo);
-        final Vertex from = (Vertex) pFrom;
-        final Vertex to = (Vertex) pTo;
-        final PriorityQueue<Path> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
+    public List<Step> dijkstra(final Item from, final Item to) {
+        checkMembership(from, to);
+        final PriorityQueue<Step> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
         return graphSearch(from, pq, to);
     }
 
@@ -229,19 +228,19 @@ public abstract class Graph<V> implements IGraph<V> {
     }
 
     // TODO implement PathNode. Iterator for path.
-    public static class Path {
-        public final Path pre;
+    public static class Step {
+        public final Step prev;
         public final AbstractEdge step;
         public final double totalCost;
 
-        public Path(Path pre, AbstractEdge step, double cost) {
-            this.pre = pre;
+        public Step(Step prev, AbstractEdge step, double cost) {
+            this.prev = prev;
             this.step = step;
-            this.totalCost = ((pre == null) ? 0 : pre.totalCost) + cost;
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost;
         }
 
         public Item getCurrent() {
-            return (pre == null) ? null : pre.step.goal;
+            return (prev == null) ? null : prev.step.goal;
         }
     }
 

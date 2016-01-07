@@ -1,28 +1,47 @@
 package com.hambbe.graph;
 
 /**
- * Created by Benjamin on 06.01.2016.
+ *
+ * {@inheritdoc}
+ *
+ * Graph with int as edge weight.
+ *
+ * It is more memory efficient than a {@link GenericGraph}, because it uses a value type for its edge weights.
+ *
+ * @param <V> Type of value in vertex
+ *
+ * @author Benjamin Meyer
+ * @see Graph
  */
 public class IntGraph<V> extends Graph<V> {
 
     @Override
     protected double getValue(AbstractEdge e) {
         assert (e instanceof IntGraph.IntEdge) : "Illegal edge " + e;
-        return ((IntEdge) e).value;
+        return ((IntEdge) e).weight;
     }
 
+    /**
+     * Edge implementation with int as weight.
+     */
     protected class IntEdge extends AbstractEdge {
-        protected final int value;
+        protected final int weight;
 
-        protected IntEdge(int value, Vertex goal) {
+        protected IntEdge(int weight, Vertex goal) {
             super(goal);
-            this.value = value;
+            this.weight = weight;
         }
     }
 
-    public void connect(Item v1, Item v2, int value) {
-        checkMembership(v1, v2);
-        ((Vertex) v1).connect(new IntEdge(value, (Vertex) v2));
+    /**
+     * Connect two {@link com.hambbe.graph.IGraph.Item} together with an edge.
+     * @param from .
+     * @param to .
+     * @param weight The edge weight.
+     */
+    public void connect(Item from, Item to, int weight) {
+        checkMembership(from, to);
+        ((Vertex) from).connect(new IntEdge(weight, (Vertex) to));
     }
 
 }
