@@ -49,8 +49,6 @@ public abstract class Graph<V> implements IGraph<V> {
     public List<Path> bellmanFord(final Item pFrom, final Item pTo)
     {
         checkMembership(pFrom, pTo);
-        final Vertex to = (Vertex) pTo;
-
         HashMap<Item, Path> V = bellmanFord(pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
@@ -63,9 +61,8 @@ public abstract class Graph<V> implements IGraph<V> {
             return null;
         }
 
+        // Build route between start and goal item
         LinkedList<Path> route = new LinkedList<>();
-
-        // Prepare Path to return
         for (Path curr = V.get(pTo); curr != null; curr = V.get(curr).pre) {
             route.addFirst(curr);
         }
