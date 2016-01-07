@@ -1,19 +1,19 @@
-package com.hambbe.graph;
+package com.hambbe.graph.test;
 
 import junit.framework.TestCase;
 
-/**
- * Created by Christian on 07.01.2016.
- */
-public class GraphTest extends TestCase {
+import org.junit.Test;
 
-    @org.junit.Test
+public class BellmannFordTest extends TestCase {
+
+    @Test
     public void testBellmanFord() throws Exception {
         // TODO: test :)
     }
 
-    @org.junit.Test
+    @Test
     public void testBellmanFord1() throws Exception {
         // TODO: test :)
     }
+
 }

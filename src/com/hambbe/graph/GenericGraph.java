@@ -11,17 +11,22 @@ import java.util.function.Function;
  */
 public abstract class GenericGraph<V, K> extends Graph<V> {
 
-    protected final Function<K, Integer> edgeToWeight;
+    protected final Function<K, Double> edgeToWeight;
 
-    public GenericGraph(Function<K, Integer> edgeToWeight) {
+    public GenericGraph(Function<K, Double> edgeToWeight) {
         if (edgeToWeight == null) throw new IllegalArgumentException("edgeToWeight can't be null");
         this.edgeToWeight = edgeToWeight;
+    }
+
+    @Override
+    protected double getValue(AbstractEdge e) {
+        return edgeToWeight.apply(((Edge) e).value);
     }
 
     public abstract void connect(Item v1, Item v2, K edge);
 
     protected class Edge extends AbstractEdge {
-        private final K value;
+        final K value;
 
         protected Edge(K value, Vertex goal) {
             super(goal);

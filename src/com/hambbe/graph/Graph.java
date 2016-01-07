@@ -21,19 +21,22 @@ public abstract class Graph<V> implements IGraph<V> {
      * @return Path to vertex, if exists. Null, otherwise.
      */
     protected Path graphSearch(Vertex from, PriorityQueue<Path> pq, Vertex to) {
+        if (from == to) return new Path(null, null, 0);
         from.edges.forEach(e -> pq.add(new Path(null, e, getValue(e))));
         Path result = null;
         while (!pq.isEmpty() && result == null) {
             final Path p = pq.poll();
             Vertex next = (Vertex) p.step.goal;
             if (next.isMarked()) continue;
-            if (next == to) result = p;
-            else {
+            if (next == to) {
+                result = p;
+            } else {
                 next.mark();
-                next.edges.forEach(e -> new Path(p, e, getValue(e)));
+                next.edges.forEach(e -> pq.add(new Path(p, e, getValue(e))));
             }
         }
         this.vertexes.forEach(Vertex::demark);
+        if (result == null) return null;
         while (result.pre != null) {
             result = result.pre;
         }
@@ -109,7 +112,7 @@ public abstract class Graph<V> implements IGraph<V> {
 
 
     /**
-     * Greedy search algorithm implementation.
+     * Greedy search algorithm implementation. //TODO check name.
      *
      * It finds an existing path.
      * It does not guarantee the optimal path.
@@ -152,7 +155,9 @@ public abstract class Graph<V> implements IGraph<V> {
         checkMembership(pFrom, pTo);
         final Vertex from = (Vertex) pFrom;
         final Vertex to = (Vertex) pTo;
-        final Function<Path, Double> assumedTotalCost = (p) -> p.totalCost + heuristic.apply(((Vertex) p.getCurrent()).value);
+        final Function<Path, Double> assumedTotalCost = (p) ->
+             p.totalCost
+             + ((p.getCurrent() == null) ? 0 : heuristic.apply(((Vertex) p.getCurrent()).value));
         final PriorityQueue<Path> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
         return graphSearch(from, pq, to);
@@ -189,11 +194,25 @@ public abstract class Graph<V> implements IGraph<V> {
     }
 
     /**
+     * @param value Value of item to get.
+     * @return First item found with value. Null, if no item was found.
+     */
+    public Item getItem(V value) {
+        for (Vertex vertex : this.vertexes) {
+            if (vertex.value.equals(value)) {
+                return vertex;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Check if item is element of this graph. Throws an {@link IllegalArgumentException} if not.
      * @param item Item to check
      */
     protected void checkMembership(Item item) {
-        if (!(item instanceof GenericGraph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
+        assert item != null;
+        if (!(item instanceof Graph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
         Vertex v = (Vertex) item;
         if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of GenericGraph");
 
@@ -209,6 +228,7 @@ public abstract class Graph<V> implements IGraph<V> {
         }
     }
 
+    // TODO implement PathNode. Iterator for path.
     public static class Path {
         public final Path pre;
         public final AbstractEdge step;
@@ -221,7 +241,7 @@ public abstract class Graph<V> implements IGraph<V> {
         }
 
         public Item getCurrent() {
-            return pre.step.goal;
+            return (pre == null) ? null : pre.step.goal;
         }
     }
 

@@ -6,7 +6,7 @@ package com.hambbe.graph;
 public class IntGraph<V> extends Graph<V> {
 
     @Override
-    protected int getValue(AbstractEdge e) {
+    protected double getValue(AbstractEdge e) {
         assert (e instanceof IntGraph.IntEdge) : "Illegal edge " + e;
         return ((IntEdge) e).value;
     }
