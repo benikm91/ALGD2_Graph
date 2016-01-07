@@ -1,4 +1,4 @@
-package com.hambbe.graph.test;
+package com.hambbe.graph.data;
 
 import com.hambbe.graph.IGraph;
 import com.hambbe.graph.IntGraph;

@@ -1,6 +1,7 @@
-package com.hambbe.graph.test;
+package com.hambbe.graph.search;
 
 import com.hambbe.graph.Graph;
+import com.hambbe.graph.data.TestData;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

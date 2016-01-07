@@ -1,4 +1,4 @@
-package com.hambbe.graph.test;
+package com.hambbe.graph.search;
 
 import junit.framework.TestCase;
 
