@@ -71,7 +71,7 @@ public abstract class Graph<V> implements IGraph<V> {
 
         // Build route between start and goal item
         LinkedList<Step> route = new LinkedList<>();
-        for (Step curr = V.get(pTo); curr != null; curr = V.get(curr).prev) { //TODO V.get(curr) = curr?
+        for (Step curr = V.get(pTo); curr != null; curr = curr.prev) {
             route.addFirst(curr);
         }
         return route;
