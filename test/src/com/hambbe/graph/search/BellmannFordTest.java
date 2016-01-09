@@ -1,8 +1,8 @@
 package com.hambbe.graph.search;
 
-import com.hambbe.graph.DiGenericGraph;
+import com.hambbe.graph.AbstractGraph.Step;
 import com.hambbe.graph.Graph;
-import com.hambbe.graph.IGraph;
+import com.hambbe.graph.IntGraph;
 
 import junit.framework.TestCase;
 
@@ -27,15 +27,15 @@ public class BellmannFordTest extends TestCase {
 
     @org.junit.Test
     public void testBellmanFord() throws Exception {
-        DiGenericGraph<Test, Integer> graph = new DiGenericGraph<>(e -> e.doubleValue());
+        IntGraph<Test> graph = new IntGraph<>();
 
-        IGraph.Item H = graph.addVertex(new Test(12, "Hambbe"));
-        IGraph.Item I = graph.addVertex(new Test(786, "ist"));
-        IGraph.Item J = graph.addVertex(new Test(34, "Jaja"));
-        IGraph.Item D = graph.addVertex(new Test(56, "der"));
-        IGraph.Item E = graph.addVertex(new Test(34, "Wie bitte?"));
-        IGraph.Item W = graph.addVertex(new Test(45, "wahre"));
-        IGraph.Item K = graph.addVertex(new Test(42, "König"));
+        Graph.Item H = graph.addVertex(new Test(12, "Hambbe"));
+        Graph.Item I = graph.addVertex(new Test(786, "ist"));
+        Graph.Item J = graph.addVertex(new Test(34, "Jaja"));
+        Graph.Item D = graph.addVertex(new Test(56, "der"));
+        Graph.Item E = graph.addVertex(new Test(34, "Wie bitte?"));
+        Graph.Item W = graph.addVertex(new Test(45, "wahre"));
+        Graph.Item K = graph.addVertex(new Test(42, "König"));
 
         graph.connect(H,I,1);
         graph.connect(I,D,5);
@@ -46,11 +46,11 @@ public class BellmannFordTest extends TestCase {
         graph.connect(I,E,1);
         graph.connect(E,K,1);
 
-        List<Graph.Step> route = graph.bellmanFord(H,K);
+        List<Step> route = graph.bellmanFord(H,K);
 
         assertNotNull("No route found!", route);
 
-        String res = route.stream().map(s -> graph.getValue(s.getCurrentGoal()).name).reduce((s,a) -> s + " " + a).get();
+        String res = route.stream().map(s -> graph.getValue(s.getGoal()).name).reduce((s,a) -> s + " " + a).get();
 
         assertEquals("Not expected result!", "Hambbe ist der wahre König", res);
 

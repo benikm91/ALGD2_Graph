@@ -238,7 +238,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
     }
 
     // TODO implement PathNode. Iterator for path.
-    public static class Step {
+    public static class     Step {
         public final Step prev;
         public final AbstractEdge step;
         public final double totalCost;
@@ -246,7 +246,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         public Step(Step prev, AbstractEdge step, double cost) {
             this.prev = prev;
             this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost;
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
         }
 
         public Item getCurrent() {
@@ -258,6 +258,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         }
     }
 
+    @Override
     public V getValue(Item item) {
         checkMembership(item);
         return ((Vertex) item).value;

@@ -3,7 +3,7 @@ package com.hambbe.graph;
 import java.util.List;
 
 /**
- * Interface for all AbstractGraph implementation of the hambbe.graph library.
+ * Interface for all graph implementation of the hambbe.graph library.
  *
  * @param <V> Type of value in vertex.
  * @param <K> Type for edges.
