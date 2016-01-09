@@ -146,35 +146,6 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
     }
 
     /**
-     * A* search algorithm implementation.
-     *
-     * It finds an existing path.
-     * It finds the optimal path (if rules below are full filled).
-     * It won't look at any path which costs are higher than the optimal one (if rules below are full filled).
-     *
-     *
-     * Rules to work:
-     * <ul>
-     * <li>All step costs have to be positive.
-     * <li>Heuristic must not overestimate costs.
-     * </ul>
-     *
-     * @param from Start item.
-     * @param to Goal item.
-     * @param heuristic Heuristic function for helping to prioritize items.
-     * @return Route to item, if exists. Null, otherwise.
-     */
-    public List<Step> aStar(final Item from, final Item to, final Function<V, Double> heuristic) {
-        checkMembership(from, to);
-        final Function<Step, Double> assumedTotalCost = (p) ->
-             p.totalCost
-             + ((p.getCurrent() == null) ? 0 : heuristic.apply(((Vertex) p.getCurrent()).value));
-        final PriorityQueue<Step> pq = new PriorityQueue<>(
-                (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
-        return graphSearch(from, pq, to);
-    }
-
-    /**
      * Dijkstra algorithm implementation.
      *
      * It finds an existing path.

@@ -2,6 +2,7 @@ package com.hambbe.graph.search;
 
 import com.hambbe.graph.AbstractGraph.Step;
 import com.hambbe.graph.Graph;
+import com.hambbe.graph.Graphs;
 import com.hambbe.graph.IntGraph;
 import com.hambbe.graph.data.TestData;
 
@@ -24,7 +25,7 @@ public class AStarTest {
         IntGraph<String> graph = TestData.ABCintGraph(4);
         final Graph.Item from = graph.getItem(fromValue);
         final Graph.Item to = graph.getItem(toValue);
-        List<Step> route = graph.aStar(from, to, heuristic);
+        List<Step> route = Graphs.aStar(graph, from, to, heuristic);
         // Has found a path?
         assertNotNull("Expected: Reachable value gets found, Actual: Value not found.", route);
         assertTrue("Expected: At least 1 step, Actual: 0 steps.", route.size() > 0);
@@ -44,7 +45,7 @@ public class AStarTest {
         final Graph.Item ac = graph.getItem("AC");
         graph.disconnect(from, ac);
         // No path found?
-        List<Step> route = graph.aStar(from, to, heuristic);
+        List<Step> route = Graphs.aStar(graph, from, to, heuristic);
         assertNull("Expected: No route found, Actual: route found.", route);
     }
 
