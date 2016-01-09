@@ -88,7 +88,8 @@ public abstract class Graph<V> implements IGraph<V> {
         final Vertex from = (Vertex) pFrom;
 
         HashMap<Item, Step> V = new HashMap<>();
-        vertexes.forEach(v -> V.put(v, new Step(null, null, (from == v) ? 0 : Double.MAX_VALUE)));
+        //vertexes.forEach(v -> V.put(v, new Step(null, null, (from == v) ? 0 : Double.MAX_VALUE))); TODO: if we decide to store a reference to curent in each step, this line of code is better
+        vertexes.forEach(v -> V.put(v, (from == v) ? new Step(null, new AbstractEdge(v) {}, 0) : new Step(null, null, Double.MAX_VALUE) ));
 
         for (int i = 0; i < vertexes.size() - 1; i++) {
             for (Vertex vx : vertexes) {
@@ -96,7 +97,7 @@ public abstract class Graph<V> implements IGraph<V> {
                     Step u = V.get(vx);
                     Step v = V.get(e.goal);
                     if (u.totalCost + getValue(e) < v.totalCost) {
-                        V.put(e.goal, new Step(u, e, u.totalCost + getValue(e)));
+                        V.put(e.goal, new Step(u, e, getValue(e)));
                     }
                 }
             }
@@ -205,6 +206,11 @@ public abstract class Graph<V> implements IGraph<V> {
         return null;
     }
 
+    public V getValue(Item item) {
+        checkMembership(item);
+        return ((Vertex)item).value;
+    }
+
     /**
      * Check if item is element of this graph. Throws an {@link IllegalArgumentException} if not.
      * @param item Item to check
@@ -236,11 +242,15 @@ public abstract class Graph<V> implements IGraph<V> {
         public Step(Step prev, AbstractEdge step, double cost) {
             this.prev = prev;
             this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost;
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
         }
 
         public Item getCurrent() {
-            return (prev == null) ? null : prev.step.goal;
+            return (prev == null) ? null : prev.step.goal; // TODO: there is a problem when the step is null... store reference to current Item/Vertex as attribute of Step?
+        }
+
+        public Item getCurrentGoal() { // TODO: we need to discuss what methods we need here
+            return step.goal; // TODO: there is a problem when the step is null... store reference to current Item/Vertex as attribute of Step?
         }
     }
 
