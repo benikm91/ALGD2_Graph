@@ -130,21 +130,21 @@ public class Graphs {
 
         for (int i = 0; i < graph.vertexes.size() - 1; i++) {
             for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-                for (AbstractGraph.AbstractEdge e : vx.edges) {
+                for (Graph.AbstractEdge e : vx.edges) {
                     BellmanFordNode u = V.get(vx);
                     BellmanFordNode v = V.get(e.goal);
-                    if (u.totalCost + graph.getValue(e) < v.totalCost) {
-                        V.put(e.goal, new BellmanFordNode(e.goal, u, e, graph.getValue(e)));
+                    if (u.totalCost + e.getWeight() < v.totalCost) {
+                        V.put(e.goal, new BellmanFordNode(e.goal, u, e, e.getWeight()));
                     }
                 }
             }
         }
 
         for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-            for (AbstractGraph.AbstractEdge e : vx.edges) {
+            for (Graph.AbstractEdge e : vx.edges) {
                 BellmanFordNode u = V.get(vx);
                 BellmanFordNode v = V.get(e.goal);
-                if (u.totalCost + graph.getValue(e) < v.totalCost) {
+                if (u.totalCost + e.getWeight() < v.totalCost) {
                     return null;
                 }
             }
