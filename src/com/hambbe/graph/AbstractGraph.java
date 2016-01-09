@@ -196,14 +196,6 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         }
     }
 
-    protected static abstract class AbstractEdge {
-        protected final Item goal; // TODO: type Vertex not better here?
-
-        protected AbstractEdge(Item goal) {
-            this.goal = goal;
-        }
-    }
-
     protected class Vertex implements Item, Comparator<Vertex> {
 
         protected final AbstractGraph graph;

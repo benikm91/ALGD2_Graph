@@ -2,7 +2,6 @@ package com.hambbe.graph;
 
 import com.hambbe.graph.AbstractGraph.Step;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -77,10 +76,10 @@ public class Graphs {
     public class Link {
         public final Graph.Item from;
         public final Graph.Item to;
-        public final AbstractGraph.AbstractEdge via;
+        public final Graph.AbstractEdge via;
         public final double totalCost;
 
-        public Link(Graph.Item from, Graph.Item to, AbstractGraph.AbstractEdge via, double totalCost) {
+        public Link(Graph.Item from, Graph.Item to, Graph.AbstractEdge via, double totalCost) {
             this.from = from;
             this.to = to;
             this.via = via;
