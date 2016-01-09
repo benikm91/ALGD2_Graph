@@ -26,9 +26,6 @@ public class TestData {
      * ABC Graph has following connections:
      * wn -> wnm
      *
-     * e.g.
-     * ADF -> { ADFA, ADFB, ADFC, ... }
-     *
      * where
      *
      * w : word (Element of alphabet*)
@@ -36,10 +33,19 @@ public class TestData {
      * m : letter (Element of alphabet)
      * alphabet : { A, B, C ...}
      *
+     * e.g.
+     * ADF -> { ADFA, ADFB, ADFC, ... }
+     *
+     * where
+     *
+     * w : AD
+     * n : F
+     * m : A or B or C
+     *
      * Therefore an ABCGraph has 26^maxWordLength vertexes and 26^maxWordLength edges.
      *
-     * @param maxWordLength
-     * @return
+     * @param maxWordLength Generate all nodes so that |w| <= maxWordLength.
+     * @return ABCIntGraph with feature described above.
      */
     public static IntGraph<String> ABCintGraph(final int maxWordLength) {
         final IntGraph<String> graph = new IntGraph<>();

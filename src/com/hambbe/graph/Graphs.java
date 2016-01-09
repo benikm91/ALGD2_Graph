@@ -46,6 +46,46 @@ public class Graphs {
     }
 
     /**
+     * Greedy search algorithm implementation. //TODO check name.
+     *
+     * It finds an existing path.
+     * It does not guarantee the optimal path.
+     *
+     * @param from Start item.
+     * @param to Goal item.
+     * @param heuristic Heuristic function for prioritizing items.
+     * @return Route to item, if exists. Null, otherwise.
+     */
+    public static <V, K> List<Link> greedySearch(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to, final Function<V, Double> heuristic) {
+        graph.checkMembership(from, to);
+        final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, K>.Vertex) p.getCurrent()).value);
+        final PriorityQueue<Step> pq = new PriorityQueue<>(
+                (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
+        return graphSearch(graph, from, pq, to);
+    }
+
+    /**
+     * Dijkstra algorithm implementation.
+     *
+     * It finds an existing path.
+     * It finds the optimal path (if rules below are full filled).
+     *
+     * Rules to work:
+     * <ul>
+     * <li>All step costs have to be positive.
+     * </ul>
+     *
+     * @param from Start item.
+     * @param to Goal item.
+     * @return Route to item, if exists. Null, otherwise.
+     */
+    public static <V, K> List<Link> dijkstra(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to) {
+        graph.checkMembership(from, to);
+        final PriorityQueue<Step> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
+        return graphSearch(graph, from, pq, to);
+    }
+
+    /**
      * A* search algorithm implementation.
      *
      * It finds an existing path.
@@ -130,7 +170,7 @@ public class Graphs {
 
         for (int i = 0; i < graph.vertexes.size() - 1; i++) {
             for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-                for (Graph.AbstractEdge e : vx.edges) {
+                for (Graph.Edge e : vx.edges) {
                     BellmanFordNode u = V.get(vx);
                     BellmanFordNode v = V.get(e.goal);
                     if (u.totalCost + e.getWeight() < v.totalCost) {
@@ -141,7 +181,7 @@ public class Graphs {
         }
 
         for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-            for (Graph.AbstractEdge e : vx.edges) {
+            for (Graph.Edge e : vx.edges) {
                 BellmanFordNode u = V.get(vx);
                 BellmanFordNode v = V.get(e.goal);
                 if (u.totalCost + e.getWeight() < v.totalCost) {
@@ -158,9 +198,9 @@ public class Graphs {
     protected static class BellmanFordNode {
         Graph.Item value;
         BellmanFordNode from;
-        AbstractGraph.AbstractEdge via;
+        Graph.Edge via;
         double totalCost;
-        public BellmanFordNode(AbstractGraph.Item value, BellmanFordNode from, AbstractGraph.AbstractEdge via, double totalCost) {
+        public BellmanFordNode(AbstractGraph.Item value, BellmanFordNode from, Graph.Edge via, double totalCost) {
             this.value = value;
             this.from = from;
             this.via = via;
@@ -171,10 +211,10 @@ public class Graphs {
     public static class Link {
         public final Graph.Item from;
         public final Graph.Item to;
-        public final Graph.AbstractEdge via;
+        public final Graph.Edge via;
         public final double totalCost;
 
-        public Link(Graph.Item from, Graph.Item to, Graph.AbstractEdge via, double totalCost) {
+        public Link(Graph.Item from, Graph.Item to, Graph.Edge via, double totalCost) {
             this.from = from;
             this.to = to;
             this.via = via;

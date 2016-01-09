@@ -24,7 +24,7 @@ public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
         ((Vertex) from).connect(new GenericEdge(edgeValue, (Vertex) to));
     }
 
-    protected class GenericEdge extends AbstractEdge {
+    protected class GenericEdge extends Edge {
         final K value;
 
         protected GenericEdge(K value, Vertex goal) {

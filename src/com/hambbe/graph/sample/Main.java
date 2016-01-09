@@ -1,7 +1,7 @@
 package com.hambbe.graph.sample;
 
-import com.hambbe.graph.AbstractGraph;
 import com.hambbe.graph.Graph;
+import com.hambbe.graph.Graphs;
 import com.hambbe.graph.IntGraph;
 
 import java.util.List;
@@ -31,14 +31,12 @@ public class Main {
         graph.connect(newyork, berlin, 40);
         graph.connect(berlin, newyork, 45);
 
-        List<AbstractGraph.Step> route = graph.dijkstra(basel, tokyo);
+        List<Graphs.Link> route = Graphs.dijkstra(graph, basel, tokyo);
         System.out.print(graph.getValue(basel));
         double lastCost = 0;
-        for (AbstractGraph.Step s : route) {
-            if (s.getGoal() != null) {
-                System.out.print(" -" + (s.totalCost - lastCost) + "-> " + graph.getValue(s.getGoal()));
-                lastCost = s.totalCost;
-            }
+        for (Graphs.Link s : route) {
+            System.out.print(" -" + (s.totalCost - lastCost) + "-> " + graph.getValue(s.to));
+            lastCost = s.totalCost;
         }
         System.out.print(" ( = " + lastCost + " )" );
 
