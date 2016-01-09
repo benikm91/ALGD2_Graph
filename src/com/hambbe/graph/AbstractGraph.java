@@ -206,7 +206,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
      * @param value Value of item to get.
      * @return First item found with value. Null, if no item was found.
      */
-    public Item getItem(V value) {
+    public Item getItem(V value) { //TODO if this.vertex is a Tree we could have O(log n)
         for (Vertex vertex : this.vertexes) {
             if (vertex.value.equals(value)) {
                 return vertex;
