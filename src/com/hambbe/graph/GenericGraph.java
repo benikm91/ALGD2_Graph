@@ -11,7 +11,7 @@ import java.util.function.Function;
  */
 public class GenericGraph<V, K> extends AbstractGraph<V, K> {
 
-    protected final Function<K, Double> edgeToWeight;
+    protected final Function<K, Double> edgeToWeight; // TODO: Edge instead of generic type K as edge?
 
     public GenericGraph(Function<K, Double> edgeToWeight) {
         if (edgeToWeight == null) throw new IllegalArgumentException("edgeToWeight can't be null");
