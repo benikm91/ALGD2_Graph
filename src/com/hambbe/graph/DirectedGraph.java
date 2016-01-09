@@ -3,17 +3,17 @@ package com.hambbe.graph;
 import java.util.function.Function;
 
 /***
- * Gives a general GenericGraph-structure for extension and default implementations for specific search algorithms.
+ * Gives a general DirectedGraph-structure for extension and default implementations for specific search algorithms.
  * Sub-classes may override search algorithms and improve them.
  *
  * @param <V> Type for vertexes.
  * @param <K> Type for edges.
  */
-public class GenericGraph<V, K> extends AbstractGraph<V, K> {
+public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
 
     protected final Function<K, Double> edgeToWeight; // TODO: Edge instead of generic type K as edge?
 
-    public GenericGraph(Function<K, Double> edgeToWeight) {
+    public DirectedGraph(Function<K, Double> edgeToWeight) {
         if (edgeToWeight == null) throw new IllegalArgumentException("edgeToWeight can't be null");
         this.edgeToWeight = edgeToWeight;
     }

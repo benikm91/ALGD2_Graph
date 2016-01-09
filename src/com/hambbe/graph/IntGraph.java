@@ -4,7 +4,7 @@ package com.hambbe.graph;
  *
  * AbstractGraph with value type <tt>int</tt> as edge weight.
  *
- * It is more memory efficient than a {@link GenericGraph}, because it uses a value type for its edge weights.
+ * It is more memory efficient than a {@link DirectedGraph}, because it uses a value type for its edge weights.
  *
  * @param <V> Type of value in vertex
  *

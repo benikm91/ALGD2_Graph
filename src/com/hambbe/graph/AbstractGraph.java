@@ -2,7 +2,6 @@ package com.hambbe.graph;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -123,7 +122,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         assert item != null; // TODO throw exception if item == null?
         if (!(item instanceof AbstractGraph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
         Vertex v = (Vertex) item;
-        if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of GenericGraph");
+        if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of DirectedGraph");
 
     }
 
