@@ -20,8 +20,6 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
 
     protected final List<Vertex> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
 
-    protected abstract double getValue(AbstractEdge e);
-
     /**
      * Helper function for different graph search implementations.
      * @param pFrom Vertex we are starting at.
@@ -33,7 +31,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         final Vertex from = (Vertex) pFrom;
         final Vertex to = (Vertex) pTo;
         if (from == to) return new LinkedList<>();
-        from.edges.forEach(e -> pq.add(new Step(null, e, getValue(e))));
+        from.edges.forEach(e -> pq.add(new Step(null, e, e.getWeight())));
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
@@ -43,7 +41,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
                 result = p;
             } else {
                 next.mark();
-                next.edges.forEach(e -> pq.add(new Step(p, e, getValue(e))));
+                next.edges.forEach(e -> pq.add(new Step(p, e, e.getWeight())));
             }
         }
         this.vertexes.forEach(Vertex::demark);

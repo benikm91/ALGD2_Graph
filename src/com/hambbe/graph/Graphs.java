@@ -20,7 +20,7 @@ public class Graphs {
         final AbstractGraph<V, K>.Vertex from = (AbstractGraph<V, K>.Vertex) pFrom;
         final AbstractGraph<V, K>.Vertex to = (AbstractGraph<V, K>.Vertex) pTo;
         if (from == to) return new LinkedList<>();
-        (from.edges).forEach(e -> pq.add(new Step(null, e, graph.getValue(e))));
+        from.edges.forEach(e -> pq.add(new Step(null, e, e.getWeight())));
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
@@ -30,7 +30,7 @@ public class Graphs {
                 result = p;
             } else {
                 next.mark();
-                (next.edges).forEach(e -> pq.add(new Step(p, e, graph.getValue(e))));
+                next.edges.forEach(e -> pq.add(new Step(p, e, e.getWeight())));
             }
         }
         graph.vertexes.forEach(AbstractGraph.Vertex::demark);

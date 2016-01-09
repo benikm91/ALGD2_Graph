@@ -19,12 +19,6 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
         ((Vertex) from).connect(new IntEdge(edgeValue, (Vertex) to));
     }
 
-    @Override
-    protected double getValue(AbstractEdge e) {
-        assert (e instanceof IntGraph.IntEdge) : "Illegal edge " + e;
-        return ((IntEdge) e).weight;
-    }
-
     /**
      * Edge implementation with value type <tt>int</tt> as weight.
      */
@@ -34,6 +28,11 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
         protected IntEdge(int weight, Vertex goal) {
             super(goal);
             this.weight = weight;
+        }
+
+        @Override
+        protected double getWeight() {
+            return weight;
         }
     }
 

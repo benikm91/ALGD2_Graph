@@ -19,11 +19,6 @@ public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
     }
 
     @Override
-    protected double getValue(AbstractEdge e) {
-        return edgeToWeight.apply(((GenericEdge) e).value);
-    }
-
-    @Override
     public void connect(Item from, Item to, K edgeValue) {
         checkMembership(from, to);
         ((Vertex) from).connect(new GenericEdge(edgeValue, (Vertex) to));
@@ -35,6 +30,11 @@ public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
         protected GenericEdge(K value, Vertex goal) {
             super(goal);
             this.value = value;
+        }
+
+        @Override
+        protected double getWeight() {
+            return edgeToWeight.apply(this.value);
         }
     }
 
