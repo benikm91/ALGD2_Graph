@@ -1,14 +1,15 @@
 package com.hambbe.graph;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
- * Test {@link Graph} methods.
- * Because <tt>Graph</tt> is abstract, simple implementation {@link IntGraph} will be used.
+ * Test {@link AbstractGraph} methods.
+ * Because <tt>AbstractGraph</tt> is abstract, simple implementation {@link IntGraph} will be used.
  *
  */
-public class GraphTest {
+public class AbstractGraphTest {
 
     @Test
     public void testAddVertex() {

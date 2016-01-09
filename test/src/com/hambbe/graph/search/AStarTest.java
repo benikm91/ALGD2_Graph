@@ -1,6 +1,6 @@
 package com.hambbe.graph.search;
 
-import com.hambbe.graph.Graph;
+import com.hambbe.graph.AbstractGraph;
 import com.hambbe.graph.data.TestData;
 
 import org.junit.Test;
@@ -9,7 +9,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class AStarTest {
@@ -26,7 +27,7 @@ public class AStarTest {
 
     @Test
     public void testAStar() throws Exception {
-        List<Graph.Step> r = data.graph.aStar(data.from, data.to, data.heuristic);
+        List<AbstractGraph.Step> r = data.graph.aStar(data.from, data.to, data.heuristic);
         assertNotNull("Reachable value not found.", r);
         assertTrue("Number of steps size wrong.", r.size() > 0);
     }

@@ -9,7 +9,7 @@ import java.util.function.Function;
  * @param <V> Type for vertexes.
  * @param <K> Type for edges.
  */
-public abstract class GenericGraph<V, K> extends Graph<V> {
+public class GenericGraph<V, K> extends AbstractGraph<V, K> {
 
     protected final Function<K, Double> edgeToWeight;
 
@@ -20,15 +20,19 @@ public abstract class GenericGraph<V, K> extends Graph<V> {
 
     @Override
     protected double getValue(AbstractEdge e) {
-        return edgeToWeight.apply(((Edge) e).value);
+        return edgeToWeight.apply(((GenericEdge) e).value);
     }
 
-    public abstract void connect(Item v1, Item v2, K edge);
+    @Override
+    public void connect(Item from, Item to, K edgeValue) {
+        checkMembership(from, to);
+        ((Vertex) from).connect(new GenericEdge(edgeValue, (Vertex) to));
+    }
 
-    protected class Edge extends AbstractEdge {
+    protected class GenericEdge extends AbstractEdge {
         final K value;
 
-        protected Edge(K value, Vertex goal) {
+        protected GenericEdge(K value, Vertex goal) {
             super(goal);
             this.value = value;
         }
