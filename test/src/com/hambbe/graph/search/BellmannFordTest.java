@@ -3,9 +3,8 @@ package com.hambbe.graph.search;
 import com.hambbe.graph.DiGenericGraph;
 import com.hambbe.graph.Graph;
 import com.hambbe.graph.IGraph;
-import junit.framework.TestCase;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import java.util.List;
 

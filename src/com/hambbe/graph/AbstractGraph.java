@@ -81,7 +81,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
 
         // Build route between start and goal item
         LinkedList<Step> route = new LinkedList<>();
-        for (Step curr = V.get(pTo); curr != null; curr = V.get(curr).prev) { //TODO V.get(curr) = curr?
+        for (Step curr = V.get(pTo); curr != null; curr = curr.prev) {
             route.addFirst(curr);
         }
         return route;
@@ -98,7 +98,8 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         final Vertex from = (Vertex) pFrom;
 
         HashMap<Item, Step> V = new HashMap<>();
-        vertexes.forEach(v -> V.put(v, new Step(null, null, (from == v) ? 0 : Double.MAX_VALUE)));
+        //vertexes.forEach(v -> V.put(v, new Step(null, null, (from == v) ? 0 : Double.MAX_VALUE))); TODO: if we decide to store a reference to curent in each step, this line of code is better
+        vertexes.forEach(v -> V.put(v, (from == v) ? new Step(null, new AbstractEdge(v) {}, 0) : new Step(null, null, Double.MAX_VALUE) ));
 
         for (int i = 0; i < vertexes.size() - 1; i++) {
             for (Vertex vx : vertexes) {
@@ -106,7 +107,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
                     Step u = V.get(vx);
                     Step v = V.get(e.goal);
                     if (u.totalCost + getValue(e) < v.totalCost) {
-                        V.put(e.goal, new Step(u, e, u.totalCost + getValue(e)));
+                        V.put(e.goal, new Step(u, e, getValue(e)));
                     }
                 }
             }
@@ -124,7 +125,6 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
 
         return V;
     }
-
 
     /**
      * Greedy search algorithm implementation. //TODO check name.

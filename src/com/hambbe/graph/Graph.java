@@ -1,320 +1,70 @@
 package com.hambbe.graph;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.List;
 
 /**
- * General abstract implementation for different Graph implementations in the hambbe.graph library.
- * @param <V> Type of value in vertex
+ * Interface for all AbstractGraph implementation of the hambbe.graph library.
+ *
+ * @param <V> Type of value in vertex.
+ * @param <K> Type for edges.
  */
-public abstract class Graph<V> implements IGraph<V> {
-
-    protected final List<Vertex> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
-
-    protected abstract double getValue(AbstractEdge e);
+public interface Graph<V, K> {
 
     /**
-     * Helper function for different graph search implementations.
-     * @param pFrom Vertex we are starting at.
-     * @param pq Initialized priority queue.
-     * @param pTo Vertex we are looking for.
-     * @return Route to vertex, if exists. Null, otherwise.
+     * Connect two {@link Graph.Item} together with an edge.
+     *
+     * @param from .
+     * @param to .
+     * @param edgeValue The edge value.
      */
-    protected List<Step> graphSearch(Item pFrom, PriorityQueue<Step> pq, Item pTo) {
-        final Vertex from = (Vertex) pFrom;
-        final Vertex to = (Vertex) pTo;
-        if (from == to) return new LinkedList<>();
-        from.edges.forEach(e -> pq.add(new Step(null, e, getValue(e))));
-        Step result = null;
-        while (!pq.isEmpty() && result == null) {
-            final Step p = pq.poll();
-            Vertex next = (Vertex) p.step.goal;
-            if (next.isMarked()) continue;
-            if (next == to) {
-                result = p;
-            } else {
-                next.mark();
-                next.edges.forEach(e -> pq.add(new Step(p, e, getValue(e))));
-            }
-        }
-        this.vertexes.forEach(Vertex::demark);
-        if (result == null) return null;
-
-        // Build route between start and goal item
-        LinkedList<Step> route = new LinkedList<>();
-        for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(prev);
-        }
-        return route;
-    }
+    void connect(Graph.Item from, Graph.Item to, K edgeValue);
 
     /**
-     *
-     * @param pFrom Stating item
-     * @param pTo Goal Item
-     * @return
+     * Add a vertex to the graph.
+     * @param value The value of the vertex to create.
+     * @return An item reference to the vertex after the ... principle.
      */
-    public List<Step> bellmanFord(final Item pFrom, final Item pTo)
-    {
-        checkMembership(pFrom, pTo);
-        HashMap<Item, Step> V = bellmanFord(pFrom);
-
-        // Return null if the bellman-ford algorithm wasn't successful
-        if (V == null) {
-            return null;
-        }
-
-        // Return null if the goal is unreachable from the given start item
-        if (V.get(pTo).totalCost == Double.MAX_VALUE) {
-            return null;
-        }
-
-        // Build route between start and goal item
-        LinkedList<Step> route = new LinkedList<>();
-        for (Step curr = V.get(pTo); curr != null; curr = curr.prev) {
-            route.addFirst(curr);
-        }
-        return route;
-    }
+    Item addVertex(V value);
 
     /**
-     * Runtime complexity: O(|V|*|E|)
-     *
-     * @param pFrom Start item.
-     * @return
+     * Check if there is a connection between from and to.
+     * @param from From item
+     * @param to To item.
+     * @return True if there is a connection. False, otherwise.
      */
-    public HashMap<Item, Step> bellmanFord(final Item pFrom) {
-        checkMembership(pFrom);
-        final Vertex from = (Vertex) pFrom;
-
-        HashMap<Item, Step> V = new HashMap<>();
-        //vertexes.forEach(v -> V.put(v, new Step(null, null, (from == v) ? 0 : Double.MAX_VALUE))); TODO: if we decide to store a reference to curent in each step, this line of code is better
-        vertexes.forEach(v -> V.put(v, (from == v) ? new Step(null, new AbstractEdge(v) {}, 0) : new Step(null, null, Double.MAX_VALUE) ));
-
-        for (int i = 0; i < vertexes.size() - 1; i++) {
-            for (Vertex vx : vertexes) {
-                for (AbstractEdge e : vx.edges) {
-                    Step u = V.get(vx);
-                    Step v = V.get(e.goal);
-                    if (u.totalCost + getValue(e) < v.totalCost) {
-                        V.put(e.goal, new Step(u, e, getValue(e)));
-                    }
-                }
-            }
-        }
-
-        for (Vertex vx : vertexes) {
-            for (AbstractEdge e : vx.edges) {
-                Step u = V.get(vx);
-                Step v = V.get(e.goal);
-                if (u.totalCost + getValue(e) < v.totalCost) {
-                    return null;
-                }
-            }
-        }
-
-        return V;
-    }
-
+    boolean adjacent(Item from, Item to);
 
     /**
-     * Greedy search algorithm implementation. //TODO check name.
-     *
-     * It finds an existing path.
-     * It does not guarantee the optimal path.
-     *
-     * @param from Start item.
-     * @param to Goal item.
-     * @param heuristic Heuristic function for prioritizing items.
-     * @return Route to item, if exists. Null, otherwise.
+     * @param from Item to get neighbors from.
+     * @return All neighbors of item.
      */
-    public List<Step> greedySearch(final Item from, final Item to, final Function<V, Double> heuristic) {
-        checkMembership(from, to);
-        final Function<Step, Double> greedy = (p) -> heuristic.apply(((Vertex) p.getCurrent()).value);
-        final PriorityQueue<Step> pq = new PriorityQueue<>(
-                (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
-        return graphSearch(from, pq, to);
-    }
+    List<Item> neighbors(Item from);
 
     /**
-     * A* search algorithm implementation.
-     *
-     * It finds an existing path.
-     * It finds the optimal path (if rules below are full filled).
-     * It won't look at any path which costs are higher than the optimal one (if rules below are full filled).
-     *
-     *
-     * Rules to work:
-     * <ul>
-     * <li>All step costs have to be positive.
-     * <li>Heuristic must not overestimate costs.
-     * </ul>
-     *
-     * @param from Start item.
-     * @param to Goal item.
-     * @param heuristic Heuristic function for helping to prioritize items.
-     * @return Route to item, if exists. Null, otherwise.
+     * Remove a vertex and all outgoing and ingoing edges.
+     * @param item Item to remove.
      */
-    public List<Step> aStar(final Item from, final Item to, final Function<V, Double> heuristic) {
-        checkMembership(from, to);
-        final Function<Step, Double> assumedTotalCost = (p) ->
-             p.totalCost
-             + ((p.getCurrent() == null) ? 0 : heuristic.apply(((Vertex) p.getCurrent()).value));
-        final PriorityQueue<Step> pq = new PriorityQueue<>(
-                (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
-        return graphSearch(from, pq, to);
-    }
+    void removeVertex(Item item);
 
     /**
-     * Dijkstra algorithm implementation.
-     *
-     * It finds an existing path.
-     * It finds the optimal path (if rules below are full filled).
-     *
-     * Rules to work:
-     * <ul>
-     * <li>All step costs have to be positive.
-     * </ul>
-     *
-     * @param from Start item.
-     * @param to Goal item.
-     * @return Route to item, if exists. Null, otherwise.
+     * Get the value from an Item.
+     * @param item Item to get value from.
+     * @return Value of item.
      */
-    public List<Step> dijkstra(final Item from, final Item to) {
-        checkMembership(from, to);
-        final PriorityQueue<Step> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
-        return graphSearch(from, pq, to);
-    }
-
-    @Override
-    public Item addVertex(V value) {
-        Vertex v = new Vertex(value, this);
-        vertexes.add(v);
-        return v;
-    }
+    V getValue(Item item);
 
     /**
-     * @param value Value of item to get.
-     * @return First item found with value. Null, if no item was found.
+     * Change the value for item.
+     * @param item Item to change.
+     * @param newValue New value for item.
      */
-    public Item getItem(V value) {
-        for (Vertex vertex : this.vertexes) {
-            if (vertex.value.equals(value)) {
-                return vertex;
-            }
-        }
-        return null;
-    }
+    void setValue(Item item, V newValue);
 
-    public V getValue(Item item) {
-        checkMembership(item);
-        return ((Vertex)item).value;
-    }
-
-    /**
-     * Check if item is element of this graph. Throws an {@link IllegalArgumentException} if not.
-     * @param item Item to check
+    /***
+     * Public Item for referencing vertexes in the AbstractGraph implementations after the ... principle.
+     * AbstractGraph implementations have to implement this interface into there vertex inner class,
+     * so a vertex can be referenced from outside the graph.
      */
-    protected void checkMembership(Item item) {
-        assert item != null;
-        if (!(item instanceof Graph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
-        Vertex v = (Vertex) item;
-        if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of GenericGraph");
-
-    }
-
-    /**
-     * Calls {@link #checkMembership(Item)} for all items.
-     * @param items Items to check.
-     */
-    protected void checkMembership(Item... items) {
-        for (Item item : items) {
-            checkMembership(item);
-        }
-    }
-
-    // TODO implement PathNode. Iterator for path.
-    public static class Step {
-        public final Step prev;
-        public final AbstractEdge step;
-        public final double totalCost;
-
-        public Step(Step prev, AbstractEdge step, double cost) {
-            this.prev = prev;
-            this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
-        }
-
-        public Item getCurrent() {
-            return (prev == null) ? null : prev.step.goal; // TODO: there is a problem when the step is null... store reference to current Item/Vertex as attribute of Step?
-        }
-
-        public Item getCurrentGoal() { // TODO: we need to discuss what methods we need here
-            return step.goal; // TODO: there is a problem when the step is null... store reference to current Item/Vertex as attribute of Step?
-        }
-    }
-
-    public static abstract class AbstractEdge {
-        protected final Item goal; // TODO: type Vertex not better here?
-
-        public AbstractEdge(Item goal) {
-            this.goal = goal;
-        }
-    }
-
-    protected class Vertex implements Item, Comparator<Vertex> {
-
-        protected final Graph graph;
-        protected final V value;
-
-        /**
-         * Helper variable for marking the vertex with extra info (like visited).
-         * Byte was chosen, so different info can be stored and it needs also 1 byte of storage (same as boolean).
-         */
-        protected byte marked = 0;
-
-        /** adjacency list */
-        protected Set<AbstractEdge> edges = new HashSet<>(); //TODO check if HashMap best?
-
-        protected Vertex(V value, Graph graph) {
-            this.value = value; //TODO check if has to clone
-            this.graph = graph;
-        }
-
-        protected void connect(AbstractEdge edge) {
-            this.edges.add(edge);
-        }
-
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
-        public int compare(Vertex v1, Vertex v2) {
-            return v2.edges.size() - v1.edges.size();
-        }
-
-        public boolean isMarked() {
-            return this.marked != 0;
-        }
-
-        public byte getMarkedValue() {
-            return this.marked;
-        }
-
-        public void demark() {
-            this.setMarked((byte) 0);
-        }
-
-        public void mark() {
-            this.setMarked((byte) 1);
-        }
-
-        public void setMarked(byte marked) {
-            this.marked = marked;
-        }
-
-    }
     interface Item { }
 
 }
