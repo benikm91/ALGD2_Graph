@@ -24,7 +24,7 @@ public class Graphs {
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
-            AbstractGraph<V, K>.Vertex next = (AbstractGraph<V, K>.Vertex) p.step.goal;
+            final AbstractGraph<V, K>.Vertex next = (AbstractGraph<V, K>.Vertex) p.step.goal;
             if (next.isMarked()) continue;
             if (next == to) {
                 result = p;
