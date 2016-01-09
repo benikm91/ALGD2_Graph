@@ -16,7 +16,7 @@ public class Graphs {
      * @param pTo Vertex we are looking for.
      * @return Route to vertex, if exists. Null, otherwise.
      */
-    protected static <V, K> List<Step> graphSearch(final AbstractGraph<V, K> graph, Graph.Item pFrom, PriorityQueue<Step> pq, Graph.Item pTo) {
+    protected static <V, K> List<Link> graphSearch(final AbstractGraph<V, K> graph, Graph.Item pFrom, PriorityQueue<Step> pq, Graph.Item pTo) {
         final AbstractGraph<V, K>.Vertex from = (AbstractGraph<V, K>.Vertex) pFrom;
         final AbstractGraph<V, K>.Vertex to = (AbstractGraph<V, K>.Vertex) pTo;
         if (from == to) return new LinkedList<>();
@@ -37,9 +37,9 @@ public class Graphs {
         if (result == null) return null;
 
         // Build route between start and goal item
-        LinkedList<Step> route = new LinkedList<>();
+        LinkedList<Link> route = new LinkedList<>();
         for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(prev);
+            route.addFirst(new Link(from, to, prev.step, prev.totalCost));
         }
         return route;
     }
@@ -63,7 +63,7 @@ public class Graphs {
      * @param heuristic Heuristic function for helping to prioritize items.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, K> List<Step> aStar(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to, final Function<V, Double> heuristic) {
+    public static <V, K> List<Link> aStar(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to, final Function<V, Double> heuristic) {
         graph.checkMembership(from, to);
         final Function<Step, Double> assumedTotalCost = (p) ->
                 p.totalCost
@@ -73,7 +73,7 @@ public class Graphs {
         return graphSearch(graph, from, pq, to);
     }
 
-    public class Link {
+    public static class Link {
         public final Graph.Item from;
         public final Graph.Item to;
         public final Graph.AbstractEdge via;
