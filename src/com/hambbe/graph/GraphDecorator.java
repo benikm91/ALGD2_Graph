@@ -29,6 +29,11 @@ public abstract class GraphDecorator<V, K> implements Graph<V, K> {
     }
 
     @Override
+    public boolean disconnect(Item from, Item to) {
+        return graph.disconnect(from, to);
+    }
+
+    @Override
     public Item addVertex(V value) {
         return graph.addVertex(value);
     }
@@ -51,6 +56,11 @@ public abstract class GraphDecorator<V, K> implements Graph<V, K> {
     @Override
     public V getValue(Item item) {
         return getValue(item);
+    }
+
+    @Override
+    public Item getItem(V value) {
+        return graph.getItem(value);
     }
 
     @Override

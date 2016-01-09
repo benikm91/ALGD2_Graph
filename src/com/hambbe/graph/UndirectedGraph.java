@@ -12,4 +12,10 @@ public class UndirectedGraph<V, K> extends GraphDecorator<V, K> {
         graph.connect(to, from, weight);
     }
 
+    @Override
+    public boolean disconnect(Graph.Item from, Graph.Item to) {
+        return graph.disconnect(from, to)
+               && graph.disconnect(to, from);
+    }
+
 }

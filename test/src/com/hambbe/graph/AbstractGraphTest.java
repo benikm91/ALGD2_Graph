@@ -61,4 +61,22 @@ public class AbstractGraphTest {
                 actualNeighbours.isEmpty());
     }
 
+    @Test
+    public void testGetValue() {
+        IntGraph<String> graph = new IntGraph<>();
+        Graph.Item value = graph.addVertex("Value");
+        Graph.Item notValue = graph.addVertex("Not value");
+        assertFalse(graph.getValue(notValue).equals("Value"));
+        assertTrue(graph.getValue(value).equals("Value"));
+    }
+
+    @Test
+    public void testSetValue() {
+        IntGraph<String> graph = new IntGraph<>();
+        Graph.Item value = graph.addVertex("Not value");
+        assertFalse(graph.getValue(value).equals("Value"));
+        graph.setValue(value, "Value");
+        assertTrue(graph.getValue(value).equals("Value"));
+    }
+
 }

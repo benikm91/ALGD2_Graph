@@ -11,13 +11,25 @@ import java.util.List;
 public interface Graph<V, K> {
 
     /**
-     * Connect two {@link Graph.Item} together with an edge.
+     * Connect two {@link com.hambbe.graph.Graph.Item} together with an edge.
      *
      * @param from .
      * @param to .
      * @param edgeValue The edge value.
      */
-    void connect(Graph.Item from, Graph.Item to, K edgeValue);
+    void connect(Item from, Item to, K edgeValue);
+
+    /**
+     * Disconnect two directly connected {@link com.hambbe.graph.Graph.Item}.
+     * Removes first direct connection found from <tt>from</tt> to <tt>to</tt>.
+     *
+     * Direct connection : Reachable with one step.
+     *
+     * @param from .
+     * @param to .
+     * @return True, if successfully removed. False, otherwise (e.g. Edge not found).
+     */
+    boolean disconnect(Item from, Item to);
 
     /**
      * Add a vertex to the graph.
@@ -52,6 +64,12 @@ public interface Graph<V, K> {
      * @return Value of item.
      */
     V getValue(Item item);
+
+    /**
+     * @param value Value of item to get.
+     * @return First item found with value. Null, if no item was found.
+     */
+    Item getItem(V value);
 
     /**
      * Change the value for item.

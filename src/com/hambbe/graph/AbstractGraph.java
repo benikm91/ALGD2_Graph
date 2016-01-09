@@ -202,10 +202,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         return v;
     }
 
-    /**
-     * @param value Value of item to get.
-     * @return First item found with value. Null, if no item was found.
-     */
+    @Override
     public Item getItem(V value) { //TODO if this.vertex is a Tree we could have O(log n)
         for (Vertex vertex : this.vertexes) {
             if (vertex.value.equals(value)) {
@@ -220,7 +217,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
      * @param item Item to check
      */
     protected void checkMembership(Item item) {
-        assert item != null;
+        assert item != null; // TODO throw exception if item == null?
         if (!(item instanceof AbstractGraph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
         Vertex v = (Vertex) item;
         if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of GenericGraph");
@@ -237,25 +234,11 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         }
     }
 
-    // TODO implement PathNode. Iterator for path.
-    public static class     Step {
-        public final Step prev;
-        public final AbstractEdge step;
-        public final double totalCost;
-
-        public Step(Step prev, AbstractEdge step, double cost) {
-            this.prev = prev;
-            this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
-        }
-
-        public Item getCurrent() {
-            return (prev == null) ? null : prev.getGoal();
-        }
-
-        public Item getGoal() {
-            return (step == null) ? null : step.goal;
-        }
+    @Override
+    public boolean disconnect(Item from, Item to) {
+        if (from == null || to == null) return false;
+        checkMembership(from, to);
+        return ((Vertex) from).disconnect((Vertex) to);
     }
 
     @Override
@@ -290,6 +273,27 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         ((Vertex) item).value = newValue;
     }
 
+    // TODO implement PathNode. Iterator for path.
+    public static class Step {
+        public final Step prev;
+        public final AbstractEdge step;
+        public final double totalCost;
+
+        public Step(Step prev, AbstractEdge step, double cost) {
+            this.prev = prev;
+            this.step = step;
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
+        }
+
+        public Item getCurrent() {
+            return (prev == null) ? null : prev.getGoal();
+        }
+
+        public Item getGoal() {
+            return (step == null) ? null : step.goal;
+        }
+    }
+
     protected static abstract class AbstractEdge {
         protected final Item goal; // TODO: type Vertex not better here?
 
@@ -319,6 +323,10 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
 
         protected void connect(AbstractEdge edge) {
             this.edges.add(edge);
+        }
+
+        protected boolean disconnect(Vertex v) {
+            return edges.removeIf(e -> e.goal == v);
         }
 
         @Override
