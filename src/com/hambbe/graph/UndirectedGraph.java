@@ -1,6 +1,12 @@
 package com.hambbe.graph;
 
+import java.util.function.Function;
+
 public class UndirectedGraph<V, K> extends GraphDecorator<V, K> {
+
+    public UndirectedGraph(Function<K, Double> f) {
+        super(new DirectedGraph<>(f));
+    }
 
     public UndirectedGraph(Graph<V, K> graph) {
         super(graph);

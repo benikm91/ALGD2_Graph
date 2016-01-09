@@ -85,4 +85,14 @@ public interface Graph<V, K> {
      */
     interface Item { }
 
+    abstract class AbstractEdge {
+        public final Item goal; // TODO: type Vertex not better here?
+
+        protected abstract double getWeight();
+
+        protected AbstractEdge(Item goal) {
+            this.goal = goal;
+        }
+    }
+
 }

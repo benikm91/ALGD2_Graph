@@ -24,7 +24,10 @@ public class TestData {
      * Get an ABC Graph.
      *
      * ABC Graph has following connections:
-     * wn |- wnm
+     * wn -> wnm
+     *
+     * e.g.
+     * ADF -> { ADFA, ADFB, ADFC, ... }
      *
      * where
      *

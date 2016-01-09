@@ -2,7 +2,6 @@ package com.hambbe.graph;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +20,6 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
 
     protected final List<Vertex> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
 
-    protected abstract double getValue(AbstractEdge e);
-
     /**
      * Helper function for different graph search implementations.
      * @param pFrom Vertex we are starting at.
@@ -34,7 +31,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         final Vertex from = (Vertex) pFrom;
         final Vertex to = (Vertex) pTo;
         if (from == to) return new LinkedList<>();
-        from.edges.forEach(e -> pq.add(new Step(null, e, getValue(e))));
+        from.edges.forEach(e -> pq.add(new Step(null, e, e.getWeight())));
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
@@ -44,7 +41,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
                 result = p;
             } else {
                 next.mark();
-                next.edges.forEach(e -> pq.add(new Step(p, e, getValue(e))));
+                next.edges.forEach(e -> pq.add(new Step(p, e, e.getWeight())));
             }
         }
         this.vertexes.forEach(Vertex::demark);
@@ -123,7 +120,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         assert item != null; // TODO throw exception if item == null?
         if (!(item instanceof AbstractGraph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
         Vertex v = (Vertex) item;
-        if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of GenericGraph");
+        if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of DirectedGraph");
 
     }
 
@@ -194,14 +191,6 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
 
         public Item getGoal() {
             return (step == null) ? null : step.goal;
-        }
-    }
-
-    protected static abstract class AbstractEdge {
-        protected final Item goal; // TODO: type Vertex not better here?
-
-        protected AbstractEdge(Item goal) {
-            this.goal = goal;
         }
     }
 
