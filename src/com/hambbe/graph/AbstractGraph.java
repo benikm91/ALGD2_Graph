@@ -35,7 +35,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public List<Vertex> getVertexes() {
+    public List<? extends Vertex> getVertexes() {
         return this.vertexes;
     }
 
@@ -224,7 +224,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
 
         @Override
-        public Set<Edge> getEdges() {
+        public Set<? extends Edge> getEdges() {
             return edges;
         }
     }

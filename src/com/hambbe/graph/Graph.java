@@ -89,7 +89,7 @@ public interface Graph<V, E> {
      * Get all vertexes stored in this graph
      * @return List of vertexes
      */
-    List<Vertex> getVertexes();
+    List<? extends Vertex> getVertexes();
 
     /***
      * Public Vertex for referencing vertexes in the AbstractGraph implementations after the ... principle.
@@ -98,7 +98,7 @@ public interface Graph<V, E> {
      */
     interface Vertex {
 
-        Set<Edge> getEdges();
+        Set<? extends Edge> getEdges();
 
     }
 
