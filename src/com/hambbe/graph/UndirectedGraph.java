@@ -2,24 +2,24 @@ package com.hambbe.graph;
 
 import java.util.function.Function;
 
-public class UndirectedGraph<V, K> extends GraphDecorator<V, K> {
+public class UndirectedGraph<V, E> extends GraphDecorator<V, E> {
 
-    public UndirectedGraph(Function<K, Double> f) {
+    public UndirectedGraph(Function<E, Double> f) {
         super(new DirectedGraph<>(f));
     }
 
-    public UndirectedGraph(Graph<V, K> graph) {
+    public UndirectedGraph(Graph<V, E> graph) {
         super(graph);
     }
 
     @Override
-    public void connect(Graph.Item from, Graph.Item to, K weight) {
+    public void connect(Vertex from, Vertex to, E weight) {
         graph.connect(from, to, weight);
         graph.connect(to, from, weight);
     }
 
     @Override
-    public boolean disconnect(Graph.Item from, Graph.Item to) {
+    public boolean disconnect(Vertex from, Vertex to) {
         return graph.disconnect(from, to)
                && graph.disconnect(to, from);
     }

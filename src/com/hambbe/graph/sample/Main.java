@@ -10,13 +10,13 @@ public class Main {
 
     public static void main(String[] args) {
         IntGraph<String> graph = new IntGraph<>();
-        Graph.Item basel = graph.addVertex("Basel");
-        Graph.Item berlin = graph.addVertex("Berlin");
-        Graph.Item rome = graph.addVertex("Rome");
-        Graph.Item jerusalem = graph.addVertex("Jerusalem");
-        Graph.Item london = graph.addVertex("London");
-        Graph.Item tokyo = graph.addVertex("Tokyo");
-        Graph.Item newyork = graph.addVertex("New York");
+        Graph.Vertex basel = graph.addVertex("Basel");
+        Graph.Vertex berlin = graph.addVertex("Berlin");
+        Graph.Vertex rome = graph.addVertex("Rome");
+        Graph.Vertex jerusalem = graph.addVertex("Jerusalem");
+        Graph.Vertex london = graph.addVertex("London");
+        Graph.Vertex tokyo = graph.addVertex("Tokyo");
+        Graph.Vertex newyork = graph.addVertex("New York");
 
         graph.connect(tokyo, berlin, 100);
         graph.connect(jerusalem, tokyo, 50);
