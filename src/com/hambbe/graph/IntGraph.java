@@ -17,7 +17,7 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
     public void connect(Vertex pFrom, Vertex pTo, Integer edgeValue) {
         checkMembership(pFrom, pTo);
         VertexImpl from = (VertexImpl) pFrom;
-        from.connect(new IntEdge(edgeValue, from, (VertexImpl)pTo));
+        from.connect(new IntEdge(edgeValue, from, (VertexImpl) pTo, this));
     }
 
     /**
@@ -26,8 +26,8 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
     protected class IntEdge extends AbstractEdge {
         protected final int weight;
 
-        protected IntEdge(int weight, VertexImpl from, VertexImpl to) {
-            super(from, to);
+        protected IntEdge(int weight, VertexImpl from, VertexImpl to, IntGraph<V> graph) {
+            super(from, to, graph);
             this.weight = weight;
         }
 

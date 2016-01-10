@@ -22,14 +22,14 @@ public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
     public void connect(Vertex pFrom, Vertex pTo, E edgeValue) {
         checkMembership(pFrom, pTo);
         final VertexImpl from = (VertexImpl) pFrom;
-        from.connect(new GenericEdge(edgeValue, from, (VertexImpl) pTo));
+        from.connect(new GenericEdge(edgeValue, from, (VertexImpl) pTo, this));
     }
 
     protected class GenericEdge extends AbstractEdge {
         final E value;
 
-        protected GenericEdge(E value, VertexImpl from, VertexImpl to) {
-            super(from, to);
+        protected GenericEdge(E value, VertexImpl from, VertexImpl to, DirectedGraph graph) {
+            super(from, to, graph);
             this.value = value;
         }
 
