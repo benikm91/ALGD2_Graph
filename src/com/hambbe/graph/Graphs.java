@@ -199,12 +199,12 @@ public class Graphs {
      * @param <E>
      * @return
      */
-    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
-        HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
+    protected static <V, E> HashMap<Graph.Vertex<V>, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex<V> pFrom) {
+        HashMap<Graph.Vertex<V>, BellmanFordNode> V = new HashMap<>();
         graph.getVertexes().forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (pFrom == v) ? 0 : Double.MAX_VALUE)));
 
         for (int i = 0; i < graph.getVertexes().size() - 1; i++) {
-            for (Graph.Vertex vertex : graph.getVertexes()) {
+            for (Graph.Vertex<V> vertex : graph.getVertexes()) {
                 for (Graph.Edge e : vertex.getEdges()) {
                     BellmanFordNode u = V.get(vertex);
                     BellmanFordNode v = V.get(e.getTo());
@@ -215,7 +215,7 @@ public class Graphs {
             }
         }
 
-        for (Graph.Vertex vertex : graph.getVertexes()) {
+        for (Graph.Vertex<V> vertex : graph.getVertexes()) {
             for (Graph.Edge e : vertex.getEdges()) {
                 BellmanFordNode u = V.get(vertex);
                 BellmanFordNode v = V.get(e.getTo());

@@ -96,9 +96,14 @@ public interface Graph<V, E> {
      * AbstractGraph implementations have to implement this interface into there vertex inner class,
      * so a vertex can be referenced from outside the graph.
      */
-    interface Vertex {
+    interface Vertex<V> {
 
+        /**
+         * @return All edges of this vertex.
+         */
         Set<? extends Edge> getEdges();
+
+        V getValue();
 
     }
 

@@ -167,7 +167,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
     }
 
-    protected class VertexImpl implements Vertex, Comparator<VertexImpl> {
+    protected class VertexImpl implements Vertex<V>, Comparator<VertexImpl> {
 
         protected final AbstractGraph graph;
         protected V value;
@@ -227,6 +227,11 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         @Override
         public Set<? extends Edge> getEdges() {
             return edges;
+        }
+
+        @Override
+        public V getValue() {
+            return this.value;
         }
     }
 
