@@ -1,9 +1,13 @@
 package com.hambbe.graph.search;
 
+import com.hambbe.graph.DirectedGraph;
 import com.hambbe.graph.Graph;
+import com.hambbe.graph.Graphs;
 import com.hambbe.graph.IntGraph;
 
 import junit.framework.TestCase;
+
+import java.util.List;
 
 public class BellmannFordTest extends TestCase {
 
@@ -24,7 +28,7 @@ public class BellmannFordTest extends TestCase {
 
     @org.junit.Test
     public void testBellmanFord() throws Exception {
-        IntGraph<Test> graph = new IntGraph<>();
+        DirectedGraph<Test, Integer> graph = new DirectedGraph<>(e -> e.doubleValue());
 
         Graph.Vertex H = graph.addVertex(new Test(12, "Hambbe"));
         Graph.Vertex I = graph.addVertex(new Test(786, "ist"));
@@ -43,13 +47,13 @@ public class BellmannFordTest extends TestCase {
         graph.connect(I,E,1);
         graph.connect(E,K,1);
 
-//        List<Step> route = graph.bellmanFord(H,K);
-//
-//        assertNotNull("No route found!", route);
-//
-//        String res = route.stream().map(s -> graph.getValue(s.getTo()).name).reduce((s,a) -> s + " " + a).get();
-//
-//        assertEquals("Not expected result!", "Hambbe ist der wahre König", res);
+        List<Graphs.Link> route = Graphs.bellmanFord(graph, H, K);
+
+        assertNotNull("No route found!", route);
+
+        String res = graph.getValue(route.get(0).getFrom()).name + " " + route.stream().map(s -> graph.getValue(s.getTo()).name).reduce((s,a) -> s + " " + a).get();
+
+        assertEquals("Not expected result!", "Hambbe ist der wahre König", res);
 
     }
 

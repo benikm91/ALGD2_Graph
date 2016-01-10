@@ -144,7 +144,7 @@ public class Graphs {
 
         // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
-        for (BellmanFordNode curr = V.get(pTo); curr != null; curr = curr.from) {
+        for (BellmanFordNode curr = V.get(pTo); curr.from != null; curr = curr.from) {
             route.addFirst(new Link(curr.via, curr.totalCost));
         }
         return route;
@@ -182,7 +182,7 @@ public class Graphs {
 
             // Build route between start and goal item
             LinkedList<Link> route = new LinkedList<>();
-            for (BellmanFordNode curr = V.get(vertex); curr != null; curr = curr.from) {
+            for (BellmanFordNode curr = V.get(vertex); curr.from != null; curr = curr.from) {
                 route.addFirst(new Link(curr.via, curr.totalCost));
             }
             routes.add(route);
