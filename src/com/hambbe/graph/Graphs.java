@@ -44,7 +44,7 @@ public class Graphs {
     }
 
     /**
-     * Greedy search algorithm implementation. //TODO check name.
+     * Greedy Best-first search algorithm implementation.
      *
      * It finds an existing path.
      * It does not guarantee the optimal path.
@@ -54,7 +54,7 @@ public class Graphs {
      * @param heuristic Heuristic function for prioritizing items.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, E> List<Link> greedySearch(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
+    public static <V, E> List<Link> bestFirstSearch(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
         graph.checkMembership(from, to);
         final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getCurrent()).value);
         final PriorityQueue<Step> pq = new PriorityQueue<>(
@@ -199,12 +199,12 @@ public class Graphs {
      * @param <E>
      * @return
      */
-    protected static <V, E> HashMap<Graph.Vertex<V>, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex<V> pFrom) {
-        HashMap<Graph.Vertex<V>, BellmanFordNode> V = new HashMap<>();
+    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
+        HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
         graph.getVertexes().forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (pFrom == v) ? 0 : Double.MAX_VALUE)));
 
-        for (int i = 0; i < graph.getVertexes().size() - 1; i++) {
-            for (Graph.Vertex<V> vertex : graph.getVertexes()) {
+        for (int i = 0; i < graph.getVertexCount() - 1; i++) {
+            for (Graph.Vertex vertex : graph.getVertexes()) {
                 for (Graph.Edge e : vertex.getEdges()) {
                     BellmanFordNode u = V.get(vertex);
                     BellmanFordNode v = V.get(e.getTo());
@@ -215,7 +215,7 @@ public class Graphs {
             }
         }
 
-        for (Graph.Vertex<V> vertex : graph.getVertexes()) {
+        for (Graph.Vertex vertex : graph.getVertexes()) {
             for (Graph.Edge e : vertex.getEdges()) {
                 BellmanFordNode u = V.get(vertex);
                 BellmanFordNode v = V.get(e.getTo());
@@ -290,8 +290,6 @@ public class Graphs {
 
     }
 
-
-    // TODO implement PathNode. Iterator for path.
     public static class Step {
         public final Step prev;
         public final AbstractGraph.AbstractEdge step;
@@ -300,7 +298,7 @@ public class Graphs {
         public Step(Step prev, AbstractGraph.AbstractEdge step, double cost) {
             this.prev = prev;
             this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost;
         }
 
         public Graph.Vertex getCurrent() {

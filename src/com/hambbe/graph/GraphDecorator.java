@@ -64,15 +64,21 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public Vertex getItem(V value) {
-        return graph.getItem(value);
-    }
-
-    @Override
     public void setValue(Vertex vertex, V newValue) {
         setValue(vertex, newValue);
     }
 
     @Override
-    public List<? extends Vertex> getVertexes() { return graph.getVertexes(); }
+    public Iterable<? extends Vertex> getVertexes() { return graph.getVertexes(); }
+
+    @Override
+    public E getEdgeValue(Edge edge) {
+        return graph.getEdgeValue(edge);
+    }
+
+    @Override
+    public int getVertexCount() {
+        return graph.getVertexCount();
+    }
+
 }

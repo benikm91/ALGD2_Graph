@@ -20,6 +20,13 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
         from.connect(new IntEdge(edgeValue, from, (VertexImpl) pTo, this));
     }
 
+    @Override
+    public Integer getEdgeValue(Edge pEdge) {
+        checkMembership(pEdge);
+        IntEdge edge = (IntEdge) pEdge;
+        return edge.weight;
+    }
+
     /**
      * Edge implementation with value type <tt>int</tt> as weight.
      */

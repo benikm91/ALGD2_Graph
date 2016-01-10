@@ -11,7 +11,7 @@ import java.util.function.Function;
  */
 public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
 
-    protected final Function<E, Double> edgeToWeight; // TODO: Edge instead of generic type E as edge?
+    protected final Function<E, Double> edgeToWeight;
 
     public DirectedGraph(Function<E, Double> edgeToWeight) {
         if (edgeToWeight == null) throw new IllegalArgumentException("edgeToWeight can't be null");
@@ -23,6 +23,13 @@ public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
         checkMembership(pFrom, pTo);
         final VertexImpl from = (VertexImpl) pFrom;
         from.connect(new GenericEdge(edgeValue, from, (VertexImpl) pTo, this));
+    }
+
+    @Override
+    public E getEdgeValue(Edge pEdge) {
+        checkMembership(pEdge);
+        GenericEdge edge = (GenericEdge) pEdge;
+        return edge.value;
     }
 
     protected class GenericEdge extends AbstractEdge {

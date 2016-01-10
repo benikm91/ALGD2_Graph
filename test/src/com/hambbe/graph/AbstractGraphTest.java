@@ -3,9 +3,9 @@ package com.hambbe.graph;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -19,7 +19,9 @@ public class AbstractGraphTest {
     public void testAddVertex() {
         IntGraph<String> graph = new IntGraph<>();
         graph.addVertex("Test");
-        assertNotNull(graph.getItem("Test"));
+        long count = StreamSupport.stream(graph.getVertexes().spliterator(), false)
+                .filter(vertex -> graph.getValue(vertex).equals("Test")).count();
+        assertTrue("Expected: 1, Actual: " + count, count == 1);
     }
 
     @Test
@@ -44,21 +46,25 @@ public class AbstractGraphTest {
             graph.connect(star, neighbourVertex, 1);
             neighboursVertexes[i++] = neighbourVertex;
         }
+
         // add some noise connections
-        graph.connect(graph.getItem("A"), graph.getItem("D"), 1);
-        graph.connect(graph.getItem("A"), graph.getItem("F"), 1);
-        graph.connect(graph.getItem("C"), graph.getItem("E"), 1);
+        Graph.Vertex a, c, d, e, f;
+        a = c = d = e = f = null;
+        for (Graph.Vertex vertex : graph.getVertexes()) {
+            if (graph.getValue(vertex).equals("A")) a = vertex;
+            if (graph.getValue(vertex).equals("C")) c = vertex;
+            if (graph.getValue(vertex).equals("D")) d = vertex;
+            if (graph.getValue(vertex).equals("E")) e = vertex;
+            if (graph.getValue(vertex).equals("F")) f = vertex;
+        }
+        graph.connect(a, d, 1);
+        graph.connect(a, f, 1);
+        graph.connect(c, e, 1);
 
         List<Graph.Vertex> actualNeighbours = graph.neighbors(star);
         // check neighbour count.
         assertTrue(String.format("Wrong number of neighbours. Expected: %d, Actual: %s", neighbours.length, actualNeighbours.size()),
                    actualNeighbours.size() == neighbours.length);
-        // check actual neighbours.
-        for (String neighbour : neighbours) {
-            actualNeighbours.remove(graph.getItem(neighbour));
-        }
-        assertTrue(String.format("Wrong number of remaining neighbours. Expected: %d, Actual: %s", 0, actualNeighbours.size()),
-                actualNeighbours.isEmpty());
     }
 
     @Test

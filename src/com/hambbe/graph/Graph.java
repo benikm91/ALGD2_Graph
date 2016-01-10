@@ -1,7 +1,6 @@
 package com.hambbe.graph;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Interface for all graph implementation of the hambbe.graph library.
@@ -72,11 +71,9 @@ public interface Graph<V, E> {
      */
     V getValue(Vertex vertex);
 
-    /**
-     * @param value Value of item to get.
-     * @return First item found with value. Null, if no item was found.
-     */
-    Vertex getItem(V value);
+    E getEdgeValue(Edge edge);
+
+    int getVertexCount();
 
     /**
      * Change the value for vertex.
@@ -89,21 +86,19 @@ public interface Graph<V, E> {
      * Get all vertexes stored in this graph
      * @return List of vertexes
      */
-    List<? extends Vertex> getVertexes();
+    Iterable<? extends Vertex> getVertexes();
 
     /***
      * Public Vertex for referencing vertexes in the AbstractGraph implementations after the ... principle.
      * AbstractGraph implementations have to implement this interface into there vertex inner class,
      * so a vertex can be referenced from outside the graph.
      */
-    interface Vertex<V> {
+    interface Vertex {
 
         /**
          * @return All edges of this vertex.
          */
-        Set<? extends Edge> getEdges();
-
-        V getValue();
+        Iterable<? extends Edge> getEdges();
 
     }
 

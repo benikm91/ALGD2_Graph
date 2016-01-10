@@ -1,10 +1,8 @@
 package com.hambbe.graph;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -16,27 +14,17 @@ import java.util.stream.Collectors;
 public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     /** Vertexes of the graph. */
-    protected final List<VertexImpl> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
+    protected final LinkedList<VertexImpl> vertexes = new LinkedList<>();
 
     @Override
     public Vertex addVertex(V value) {
         VertexImpl v = new VertexImpl(value, this);
-        vertexes.add(v);
+        vertexes.addLast(v);
         return v;
     }
 
     @Override
-    public Vertex getItem(V value) { //TODO if this.vertex is a Tree we could have O(log n)
-        for (VertexImpl vertex : this.vertexes) {
-            if (vertex.value.equals(value)) {
-                return vertex;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<? extends Vertex> getVertexes() {
+    public Iterable<? extends Vertex> getVertexes() {
         return this.vertexes;
     }
 
@@ -45,7 +33,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * @param pEdge Edge to check
      */
     protected void checkMembership(final Edge pEdge) {
-        assert pEdge != null; // TODO throw exception if vertex == null?
+        if (pEdge == null) throw new IllegalArgumentException("Null is not a member of this graph.");
         if (!(pEdge instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
         final AbstractEdge edge = (AbstractEdge) pEdge;
         if (edge.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
@@ -57,7 +45,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * @param pVertex Vertex to check
      */
     protected void checkMembership(final Vertex pVertex) {
-        assert pVertex != null; // TODO throw exception if vertex == null?
+        if (pVertex == null) throw new IllegalArgumentException("Null is not a member of this graph.");
         if (!(pVertex instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
         final VertexImpl vertex = (VertexImpl) pVertex;
         if (vertex.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
@@ -123,10 +111,6 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         checkMembership(pToRemove);
         final VertexImpl toRemove = (VertexImpl) pToRemove;
         for (VertexImpl vertex : this.vertexes) {
-//            TODO Which is faster?
-//            vertex.edges.stream()
-//                    .filter(edge -> edge.getTo() == toRemove)
-//                    .forEach(this::disconnect);
             for (AbstractEdge edge : vertex.edges) {
                 if (edge.getTo() == toRemove) {
                     this.disconnect(edge);
@@ -142,11 +126,11 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         ((VertexImpl) vertex).value = newValue;
     }
 
-    abstract class AbstractEdge implements Edge {
+    protected abstract class AbstractEdge implements Edge {
         public final AbstractGraph graph;
 
         public final Vertex from;
-        public final Vertex to; // TODO: type VertexImpl not better here?
+        public final Vertex to;
 
         public abstract double getWeight();
 
@@ -167,7 +151,12 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
     }
 
-    protected class VertexImpl implements Vertex<V>, Comparator<VertexImpl> {
+    @Override
+    public int getVertexCount() {
+        return this.vertexes.size();
+    }
+
+    protected class VertexImpl implements Vertex, Comparator<VertexImpl> {
 
         protected final AbstractGraph graph;
         protected V value;
@@ -179,15 +168,15 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         protected byte marked = 0;
 
         /** adjacency list */
-        protected Set<AbstractEdge> edges = new HashSet<>(); //TODO check if HashMap best?
+        protected LinkedList<AbstractEdge> edges = new LinkedList<>();
 
         protected VertexImpl(V value, AbstractGraph graph) {
-            this.value = value; //TODO check if has to clone
+            this.value = value;
             this.graph = graph;
         }
 
         protected void connect(AbstractEdge edge) {
-            this.edges.add(edge);
+            this.edges.addLast(edge);
         }
 
         protected boolean disconnect(VertexImpl v) {
@@ -225,14 +214,10 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
 
         @Override
-        public Set<? extends Edge> getEdges() {
+        public Iterable<? extends Edge> getEdges() {
             return edges;
         }
 
-        @Override
-        public V getValue() {
-            return this.value;
-        }
     }
 
 }

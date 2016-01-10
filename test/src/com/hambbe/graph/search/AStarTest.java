@@ -22,8 +22,18 @@ public class AStarTest {
         final String toValue = "ACBX";
         final Function<String, Double> heuristic = TestData.ABCGraphOptimalHeuristic(toValue);
         IntGraph<String> graph = TestData.ABCintGraph(4);
-        final Graph.Vertex from = graph.getItem(fromValue);
-        final Graph.Vertex to = graph.getItem(toValue);
+        // get vertexes.
+        Graph.Vertex from = null;
+        Graph.Vertex to = null;
+        for (Graph.Vertex vertex : graph.getVertexes()) {
+            if (graph.getValue(vertex).equals(fromValue))
+                from = vertex;
+            if (graph.getValue(vertex).equals(toValue))
+                to = vertex;
+        }
+        assertNotNull(from);
+        assertNotNull(to);
+
         List<Graphs.Link> route = Graphs.aStar(graph, from, to, heuristic);
         // Has found a path?
         assertNotNull("Expected: Reachable value gets found, Actual: Value not found.", route);
@@ -38,10 +48,21 @@ public class AStarTest {
         final String toValue = "ACBX";
         final Function<String, Double> heuristic = TestData.ABCGraphOptimalHeuristic(toValue);
         IntGraph<String> graph = TestData.ABCintGraph(4);
-        final Graph.Vertex from = graph.getItem(fromValue);
-        final Graph.Vertex to = graph.getItem(toValue);
-        // remove needed connection.
-        final Graph.Vertex ac = graph.getItem("AC");
+        // get vertexes.
+        Graph.Vertex from = null;
+        Graph.Vertex to = null;
+        Graph.Vertex ac = null;
+        for (Graph.Vertex vertex : graph.getVertexes()) {
+            if (graph.getValue(vertex).equals(fromValue))
+                from = vertex;
+            if (graph.getValue(vertex).equals(toValue))
+                to = vertex;
+            if (graph.getValue(vertex).equals("AC"))
+                ac = vertex;
+        }
+        assertNotNull(from);
+        assertNotNull(to);
+        assertNotNull(ac);
         graph.disconnect(from, ac);
         // No path found?
         List<Graphs.Link> route = Graphs.aStar(graph, from, to, heuristic);
