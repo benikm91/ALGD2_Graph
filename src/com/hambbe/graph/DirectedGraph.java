@@ -24,7 +24,7 @@ public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
         ((Vertex) from).connect(new GenericEdge(edgeValue, (Vertex) to));
     }
 
-    protected class GenericEdge extends Edge {
+    protected class GenericEdge extends AbstractEdge {
         final K value;
 
         protected GenericEdge(K value, Vertex goal) {
@@ -33,7 +33,7 @@ public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
         }
 
         @Override
-        protected double getWeight() {
+        public double getWeight() {
             return edgeToWeight.apply(this.value);
         }
     }

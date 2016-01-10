@@ -22,7 +22,7 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
     /**
      * Edge implementation with value type <tt>int</tt> as weight.
      */
-    protected class IntEdge extends Edge {
+    protected class IntEdge extends AbstractEdge {
         protected final int weight;
 
         protected IntEdge(int weight, Vertex goal) {
@@ -31,7 +31,7 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
         }
 
         @Override
-        protected double getWeight() {
+        public double getWeight() {
             return weight;
         }
     }

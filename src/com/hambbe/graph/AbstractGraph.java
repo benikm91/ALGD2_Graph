@@ -72,7 +72,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
     @Override
     public boolean adjacent(Item from, Item to) {
         checkMembership(from, to);
-        for (Edge e : ((Vertex) from).edges) {
+        for (AbstractEdge e : ((Vertex) from).edges) {
             if (e.goal == to) return true;
         }
         return false;
@@ -95,24 +95,18 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         ((Vertex) item).value = newValue;
     }
 
-    // TODO implement PathNode. Iterator for path.
-    public static class Step {
-        public final Step prev;
-        public final Edge step;
-        public final double totalCost;
+    abstract class AbstractEdge implements Edge {
+        public final Item goal; // TODO: type Vertex not better here?
 
-        public Step(Step prev, Edge step, double cost) {
-            this.prev = prev;
-            this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
-        }
+        public abstract double getWeight();
 
-        public Item getCurrent() {
-            return (prev == null) ? null : prev.getGoal();
-        }
-
+        @Override
         public Item getGoal() {
-            return (step == null) ? null : step.goal;
+            return goal;
+        }
+
+        protected AbstractEdge(Item goal) {
+            this.goal = goal;
         }
     }
 
@@ -128,14 +122,14 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         protected byte marked = 0;
 
         /** adjacency list */
-        protected Set<Edge> edges = new HashSet<>(); //TODO check if HashMap best?
+        protected Set<AbstractEdge> edges = new HashSet<>(); //TODO check if HashMap best?
 
         protected Vertex(V value, AbstractGraph graph) {
             this.value = value; //TODO check if has to clone
             this.graph = graph;
         }
 
-        protected void connect(Edge edge) {
+        protected void connect(AbstractEdge edge) {
             this.edges.add(edge);
         }
 

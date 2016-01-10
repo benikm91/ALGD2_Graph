@@ -1,7 +1,5 @@
 package com.hambbe.graph;
 
-import com.hambbe.graph.AbstractGraph.Step;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -170,7 +168,7 @@ public class Graphs {
 
         for (int i = 0; i < graph.vertexes.size() - 1; i++) {
             for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-                for (Graph.Edge e : vx.edges) {
+                for (AbstractGraph.AbstractEdge e : vx.edges) {
                     BellmanFordNode u = V.get(vx);
                     BellmanFordNode v = V.get(e.goal);
                     if (u.totalCost + e.getWeight() < v.totalCost) {
@@ -181,7 +179,7 @@ public class Graphs {
         }
 
         for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-            for (Graph.Edge e : vx.edges) {
+            for (AbstractGraph.AbstractEdge e : vx.edges) {
                 BellmanFordNode u = V.get(vx);
                 BellmanFordNode v = V.get(e.goal);
                 if (u.totalCost + e.getWeight() < v.totalCost) {
@@ -221,4 +219,27 @@ public class Graphs {
             this.totalCost = totalCost;
         }
     }
+
+
+    // TODO implement PathNode. Iterator for path.
+    public static class Step {
+        public final Step prev;
+        public final AbstractGraph.AbstractEdge step;
+        public final double totalCost;
+
+        public Step(Step prev, AbstractGraph.AbstractEdge step, double cost) {
+            this.prev = prev;
+            this.step = step;
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
+        }
+
+        public Graph.Item getCurrent() {
+            return (prev == null) ? null : prev.getGoal();
+        }
+
+        public Graph.Item getGoal() {
+            return (step == null) ? null : step.goal;
+        }
+    }
+
 }
