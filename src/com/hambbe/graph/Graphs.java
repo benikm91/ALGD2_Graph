@@ -38,7 +38,7 @@ public class Graphs {
         // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
         for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(new Link(from, to, prev.step, prev.totalCost));
+            route.addFirst(new Link(from, prev.step, prev.totalCost));
         }
         return route;
     }
@@ -146,7 +146,7 @@ public class Graphs {
         // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
         for (BellmanFordNode curr = V.get(pTo); curr != null; curr = curr.from) {
-            route.addFirst(new Link(curr.from.value, curr.value, curr.via, curr.totalCost));
+            route.addFirst(new Link(curr.from.value, curr.via, curr.totalCost));
         }
         return route;
     }
@@ -208,16 +208,51 @@ public class Graphs {
 
     public static class Link {
         public final Graph.Vertex from;
-        public final Graph.Vertex to;
         public final Graph.Edge via;
         public final double totalCost;
 
-        public Link(Graph.Vertex from, Graph.Vertex to, Graph.Edge via, double totalCost) {
+        public Link(Graph.Vertex from, Graph.Edge via, double totalCost) {
+            assert via != null : "Edge can't be null.";
             this.from = from;
-            this.to = to;
             this.via = via;
             this.totalCost = totalCost;
         }
+
+        /**
+         * @return Get Item from where the link starts.
+         */
+        public Graph.Vertex getFrom() {
+            return this.from;
+        }
+
+        /**
+         * @return Get Item where the link ends.
+         */
+        public Graph.Vertex getTo() {
+            return this.via.getGoal();
+        }
+
+        /**
+         * @return Get the connection {@link #getFrom()} and {@link #getTo()} have.
+         */
+        public Graph.Edge getVia() {
+            return via;
+        }
+
+        /**
+         * @return Total costs from the start to {@link #getFrom()}
+         */
+        public double getTotalCost() {
+            return this.totalCost;
+        }
+
+        /**
+         * @return Get costs from {@link #getFrom()} to {@link #getTo()})
+         */
+        public double getCost() {
+            return this.via.getWeight();
+        }
+
     }
 
 
