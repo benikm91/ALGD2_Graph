@@ -38,10 +38,10 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * Check if edge is element of this graph. Throws an {@link IllegalArgumentException} if not.
      * @param pEdge Edge to check
      */
-    protected void checkMembership(Edge pEdge) {
+    protected void checkMembership(final Edge pEdge) {
         assert pEdge != null; // TODO throw exception if vertex == null?
         if (!(pEdge instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
-        AbstractEdge edge = (AbstractEdge) pEdge;
+        final AbstractEdge edge = (AbstractEdge) pEdge;
         if (edge.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
 
     }
@@ -50,19 +50,18 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * Check if vertex is element of this graph. Throws an {@link IllegalArgumentException} if not.
      * @param pVertex Vertex to check
      */
-    protected void checkMembership(Vertex pVertex) {
+    protected void checkMembership(final Vertex pVertex) {
         assert pVertex != null; // TODO throw exception if vertex == null?
         if (!(pVertex instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
-        VertexImpl vertex = (VertexImpl) pVertex;
+        final VertexImpl vertex = (VertexImpl) pVertex;
         if (vertex.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
-
     }
 
     /**
      * Calls {@link #checkMembership(Edge)} for all edges.
      * @param edges Edges to check.
      */
-    protected void checkMembership(Edge... edges) {
+    protected void checkMembership(final Edge... edges) {
         for (Edge edge : edges) {
             checkMembership(edge);
         }
@@ -72,34 +71,34 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * Calls {@link #checkMembership(Vertex)} for all vertexes.
      * @param vertexes Items to check.
      */
-    protected void checkMembership(Vertex... vertexes) {
+    protected void checkMembership(final Vertex... vertexes) {
         for (Vertex vertex : vertexes) {
             checkMembership(vertex);
         }
     }
 
     @Override
-    public void disconnect(Edge edge) {
+    public void disconnect(final Edge edge) {
         checkMembership(edge);
-        VertexImpl from = (VertexImpl) edge.getFrom();
+        final VertexImpl from = (VertexImpl) edge.getFrom();
         from.edges.removeIf(e -> e == edge);
     }
 
     @Override
-    public boolean disconnect(Vertex from, Vertex to) {
+    public boolean disconnect(final Vertex from, final Vertex to) {
         if (from == null || to == null) return false;
         checkMembership(from, to);
         return ((VertexImpl) from).disconnect((VertexImpl) to);
     }
 
     @Override
-    public V getValue(Vertex vertex) {
+    public V getValue(final Vertex vertex) {
         checkMembership(vertex);
         return ((VertexImpl) vertex).value;
     }
 
     @Override
-    public boolean adjacent(Vertex from, Vertex to) {
+    public boolean adjacent(final Vertex from, final Vertex to) {
         checkMembership(from, to);
         for (AbstractEdge e : ((VertexImpl) from).edges) {
             if (e.to == to) return true;
@@ -108,15 +107,20 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public List<Vertex> neighbors(Vertex from) {
+    public List<Vertex> neighbors(final Vertex from) {
         checkMembership(from);
         return ((VertexImpl) from).edges.stream().map(e -> e.to).collect(Collectors.toList());
     }
 
     @Override
-    public void removeVertex(Vertex toRemove) {
-        checkMembership(toRemove);
+    public void removeVertex(final Vertex pToRemove) {
+        checkMembership(pToRemove);
+        final VertexImpl toRemove = (VertexImpl) pToRemove;
         for (VertexImpl vertex : this.vertexes) {
+//            TODO Which is faster?
+//            vertex.edges.stream()
+//                    .filter(edge -> edge.getTo() == toRemove)
+//                    .forEach(this::disconnect);
             for (AbstractEdge edge : vertex.edges) {
                 if (edge.getTo() == toRemove) {
                     this.disconnect(edge);
@@ -127,7 +131,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public void setValue(Vertex vertex, V newValue) {
+    public void setValue(final Vertex vertex, final V newValue) {
         checkMembership(vertex);
         ((VertexImpl) vertex).value = newValue;
     }
