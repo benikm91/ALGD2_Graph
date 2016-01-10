@@ -104,8 +104,19 @@ public interface Graph<V, E> {
 
     interface Edge {
 
-        Vertex getTo();
+        /**
+         * @return Graph vertex the edge points from.
+         */
         Vertex getFrom();
+
+        /**
+         * @return Graph vertex the edge points to.
+         */
+        Vertex getTo();
+
+        /**
+         * @return Weight of the edge.
+         */
         double getWeight();
 
     }

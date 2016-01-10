@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
+    /** Vertexes of the graph. */
     protected final List<VertexImpl> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
 
     @Override

@@ -244,12 +244,12 @@ public class Graphs {
     }
 
     public static class Link {
-        public final Graph.Edge via;
+        public final Graph.Edge edge;
         public final double totalCost;
 
-        public Link(Graph.Edge via, double totalCost) {
+        public Link(final Graph.Edge via, final double totalCost) {
             assert via != null : "Edge can't be null.";
-            this.via = via;
+            this.edge = via;
             this.totalCost = totalCost;
         }
 
@@ -257,21 +257,21 @@ public class Graphs {
          * @return Get Item from where the link starts.
          */
         public Graph.Vertex getFrom() {
-            return this.via.getFrom();
+            return this.edge.getFrom();
         }
 
         /**
          * @return Get Item where the link ends.
          */
         public Graph.Vertex getTo() {
-            return this.via.getTo();
+            return this.edge.getTo();
         }
 
         /**
          * @return Get the connection {@link #getFrom()} and {@link #getTo()} have.
          */
-        public Graph.Edge getVia() {
-            return via;
+        public Graph.Edge getEdge() {
+            return edge;
         }
 
         /**
@@ -285,7 +285,7 @@ public class Graphs {
          * @return Get costs from {@link #getFrom()} to {@link #getTo()})
          */
         public double getCost() {
-            return this.via.getWeight();
+            return this.edge.getWeight();
         }
 
     }
