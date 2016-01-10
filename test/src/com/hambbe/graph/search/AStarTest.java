@@ -22,8 +22,8 @@ public class AStarTest {
         final String toValue = "ACBX";
         final Function<String, Double> heuristic = TestData.ABCGraphOptimalHeuristic(toValue);
         IntGraph<String> graph = TestData.ABCintGraph(4);
-        final Graph.Item from = graph.getItem(fromValue);
-        final Graph.Item to = graph.getItem(toValue);
+        final Graph.Vertex from = graph.getItem(fromValue);
+        final Graph.Vertex to = graph.getItem(toValue);
         List<Graphs.Link> route = Graphs.aStar(graph, from, to, heuristic);
         // Has found a path?
         assertNotNull("Expected: Reachable value gets found, Actual: Value not found.", route);
@@ -38,10 +38,10 @@ public class AStarTest {
         final String toValue = "ACBX";
         final Function<String, Double> heuristic = TestData.ABCGraphOptimalHeuristic(toValue);
         IntGraph<String> graph = TestData.ABCintGraph(4);
-        final Graph.Item from = graph.getItem(fromValue);
-        final Graph.Item to = graph.getItem(toValue);
+        final Graph.Vertex from = graph.getItem(fromValue);
+        final Graph.Vertex to = graph.getItem(toValue);
         // remove needed connection.
-        final Graph.Item ac = graph.getItem("AC");
+        final Graph.Vertex ac = graph.getItem("AC");
         graph.disconnect(from, ac);
         // No path found?
         List<Graphs.Link> route = Graphs.aStar(graph, from, to, heuristic);

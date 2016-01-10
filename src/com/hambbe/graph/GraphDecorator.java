@@ -9,62 +9,62 @@ import java.util.List;
  * It is abstract, because creating an object of this only forwarding decorator doesn't make sense.
  *
  * @param <V> Type of value in vertex.
- * @param <K> Type for edges.
+ * @param <E> Type for edges.
  */
-public abstract class GraphDecorator<V, K> implements Graph<V, K> {
+public abstract class GraphDecorator<V, E> implements Graph<V, E> {
 
     /** Graph to decorate. */
-    protected final Graph<V, K> graph;
+    protected final Graph<V, E> graph;
 
     /**
      * @param graph Graph to decorate.
      */
-    public GraphDecorator(Graph<V, K> graph) {
+    public GraphDecorator(Graph<V, E> graph) {
         this.graph = graph;
     }
 
     @Override
-    public void connect(Item from, Item to, K edgeValue) {
+    public void connect(Vertex from, Vertex to, E edgeValue) {
         graph.connect(from, to, edgeValue);
     }
 
     @Override
-    public boolean disconnect(Item from, Item to) {
+    public boolean disconnect(Vertex from, Vertex to) {
         return graph.disconnect(from, to);
     }
 
     @Override
-    public Item addVertex(V value) {
+    public Vertex addVertex(V value) {
         return graph.addVertex(value);
     }
 
     @Override
-    public boolean adjacent(Item from, Item to) {
+    public boolean adjacent(Vertex from, Vertex to) {
         return graph.adjacent(from, to);
     }
 
     @Override
-    public List<Item> neighbors(Item from) {
+    public List<Vertex> neighbors(Vertex from) {
         return graph.neighbors(from);
     }
 
     @Override
-    public void removeVertex(Item item) {
-        removeVertex(item);
+    public void removeVertex(Vertex vertex) {
+        removeVertex(vertex);
     }
 
     @Override
-    public V getValue(Item item) {
-        return getValue(item);
+    public V getValue(Vertex vertex) {
+        return getValue(vertex);
     }
 
     @Override
-    public Item getItem(V value) {
+    public Vertex getItem(V value) {
         return graph.getItem(value);
     }
 
     @Override
-    public void setValue(Item item, V newValue) {
-        setValue(item, newValue);
+    public void setValue(Vertex vertex, V newValue) {
+        setValue(vertex, newValue);
     }
 }

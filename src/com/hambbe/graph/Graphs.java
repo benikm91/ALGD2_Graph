@@ -1,7 +1,5 @@
 package com.hambbe.graph;
 
-import com.hambbe.graph.AbstractGraph.Step;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,20 +10,20 @@ public class Graphs {
 
     /**
      * Helper function for different graph search implementations.
-     * @param pFrom Vertex we are starting at.
+     * @param pFrom VertexImpl we are starting at.
      * @param pq Initialized priority queue.
-     * @param pTo Vertex we are looking for.
+     * @param pTo VertexImpl we are looking for.
      * @return Route to vertex, if exists. Null, otherwise.
      */
-    protected static <V, K> List<Link> graphSearch(final AbstractGraph<V, K> graph, Graph.Item pFrom, PriorityQueue<Step> pq, Graph.Item pTo) {
-        final AbstractGraph<V, K>.Vertex from = (AbstractGraph<V, K>.Vertex) pFrom;
-        final AbstractGraph<V, K>.Vertex to = (AbstractGraph<V, K>.Vertex) pTo;
+    protected static <V, E> List<Link> graphSearch(final AbstractGraph<V, E> graph, Graph.Vertex pFrom, PriorityQueue<Step> pq, Graph.Vertex pTo) {
+        final AbstractGraph<V, E>.VertexImpl from = (AbstractGraph<V, E>.VertexImpl) pFrom;
+        final AbstractGraph<V, E>.VertexImpl to = (AbstractGraph<V, E>.VertexImpl) pTo;
         if (from == to) return new LinkedList<>();
         from.edges.forEach(e -> pq.add(new Step(null, e, e.getWeight())));
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
-            final AbstractGraph<V, K>.Vertex next = (AbstractGraph<V, K>.Vertex) p.step.goal;
+            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) p.step.goal;
             if (next.isMarked()) continue;
             if (next == to) {
                 result = p;
@@ -34,13 +32,13 @@ public class Graphs {
                 next.edges.forEach(e -> pq.add(new Step(p, e, e.getWeight())));
             }
         }
-        graph.vertexes.forEach(AbstractGraph.Vertex::demark);
+        graph.vertexes.forEach(AbstractGraph.VertexImpl::demark);
         if (result == null) return null;
 
         // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
         for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(new Link(from, to, prev.step, prev.totalCost));
+            route.addFirst(new Link(from, prev.step, prev.totalCost));
         }
         return route;
     }
@@ -56,9 +54,9 @@ public class Graphs {
      * @param heuristic Heuristic function for prioritizing items.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, K> List<Link> greedySearch(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to, final Function<V, Double> heuristic) {
+    public static <V, E> List<Link> greedySearch(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
         graph.checkMembership(from, to);
-        final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, K>.Vertex) p.getCurrent()).value);
+        final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getCurrent()).value);
         final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
         return graphSearch(graph, from, pq, to);
@@ -79,7 +77,7 @@ public class Graphs {
      * @param to Goal item.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, K> List<Link> dijkstra(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to) {
+    public static <V, E> List<Link> dijkstra(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to) {
         graph.checkMembership(from, to);
         final PriorityQueue<Step> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
         return graphSearch(graph, from, pq, to);
@@ -104,11 +102,11 @@ public class Graphs {
      * @param heuristic Heuristic function for helping to prioritize items.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, K> List<Link> aStar(final AbstractGraph<V, K> graph, final Graph.Item from, final Graph.Item to, final Function<V, Double> heuristic) {
+    public static <V, E> List<Link> aStar(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
         graph.checkMembership(from, to);
         final Function<Step, Double> assumedTotalCost = (p) ->
                 p.totalCost
-                + ((p.getCurrent() == null) ? 0 : heuristic.apply(((AbstractGraph<V, K>.Vertex) p.getCurrent()).value));
+                + ((p.getCurrent() == null) ? 0 : heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getCurrent()).value));
         final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
         return graphSearch(graph, from, pq, to);
@@ -128,12 +126,12 @@ public class Graphs {
      * @param pFrom Starting vertex
      * @param pTo Goal vertex
      * @param <V> Generic vertex type
-     * @param <K> Generic edge type
+     * @param <E> Generic edge type
      * @return Route to item, if exists and there was no cycle with negative edges on the way. Null, otherwise.
      */
-    public static <V, K> List<Link> bellmanFord(final AbstractGraph<V, K> graph, final Graph.Item pFrom, final Graph.Item pTo) {
+    public static <V, E> List<Link> bellmanFord(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom, final Graph.Vertex pTo) {
         //graph.checkMembership(pFrom, pTo);
-        HashMap<Graph.Item, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
+        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
         if (V == null) {
@@ -148,7 +146,7 @@ public class Graphs {
         // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
         for (BellmanFordNode curr = V.get(pTo); curr != null; curr = curr.from) {
-            route.addFirst(new Link(curr.from.value, curr.value, curr.via, curr.totalCost));
+            route.addFirst(new Link(curr.from.value, curr.via, curr.totalCost));
         }
         return route;
     }
@@ -199,20 +197,19 @@ public class Graphs {
      * @param graph
      * @param pFrom
      * @param <V>
-     * @param <K>
+     * @param <E>
      * @return
      */
-    protected static <V, K> HashMap<Graph.Item, BellmanFordNode> bellmanFordSearch(final AbstractGraph<V, K> graph, final Graph.Item pFrom) {
-        //graph.checkMembership(pFrom);
-        final AbstractGraph.Vertex from = (AbstractGraph.Vertex) pFrom;
+    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom) {
+        final AbstractGraph.VertexImpl from = (AbstractGraph<V, E>.VertexImpl) pFrom;
 
-        HashMap<Graph.Item, BellmanFordNode> V = new HashMap<>();
+        HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
         graph.vertexes.forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (from == v) ? 0 : Double.MAX_VALUE)));
 
         for (int i = 0; i < graph.vertexes.size() - 1; i++) {
-            for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-                for (Graph.Edge e : vx.edges) {
-                    BellmanFordNode u = V.get(vx);
+            for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
+                for (AbstractGraph.AbstractEdge e : vertex.edges) {
+                    BellmanFordNode u = V.get(vertex);
                     BellmanFordNode v = V.get(e.goal);
                     if (u.totalCost + e.getWeight() < v.totalCost) {
                         V.put(e.goal, new BellmanFordNode(e.goal, u, e, e.getWeight()));
@@ -221,9 +218,9 @@ public class Graphs {
             }
         }
 
-        for (AbstractGraph<V,K>.Vertex vx : graph.vertexes) {
-            for (Graph.Edge e : vx.edges) {
-                BellmanFordNode u = V.get(vx);
+        for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
+            for (AbstractGraph.AbstractEdge e : vertex.edges) {
+                BellmanFordNode u = V.get(vertex);
                 BellmanFordNode v = V.get(e.goal);
                 if (u.totalCost + e.getWeight() < v.totalCost) {
                     return null;
@@ -237,11 +234,11 @@ public class Graphs {
      *
      */
     protected static class BellmanFordNode {
-        Graph.Item value;
+        Graph.Vertex value;
         BellmanFordNode from;
         Graph.Edge via;
         double totalCost;
-        public BellmanFordNode(AbstractGraph.Item value, BellmanFordNode from, Graph.Edge via, double totalCost) {
+        public BellmanFordNode(Graph.Vertex value, BellmanFordNode from, Graph.Edge via, double totalCost) {
             this.value = value;
             this.from = from;
             this.via = via;
@@ -250,16 +247,75 @@ public class Graphs {
     }
 
     public static class Link {
-        public final Graph.Item from;
-        public final Graph.Item to;
+        public final Graph.Vertex from;
         public final Graph.Edge via;
         public final double totalCost;
 
-        public Link(Graph.Item from, Graph.Item to, Graph.Edge via, double totalCost) {
+        public Link(Graph.Vertex from, Graph.Edge via, double totalCost) {
+            assert via != null : "Edge can't be null.";
             this.from = from;
             this.to = to;
             this.via = via;
             this.totalCost = totalCost;
         }
+
+        /**
+         * @return Get Item from where the link starts.
+         */
+        public Graph.Vertex getFrom() {
+            return this.from;
+        }
+
+        /**
+         * @return Get Item where the link ends.
+         */
+        public Graph.Vertex getTo() {
+            return this.via.getGoal();
+        }
+
+        /**
+         * @return Get the connection {@link #getFrom()} and {@link #getTo()} have.
+         */
+        public Graph.Edge getVia() {
+            return via;
+        }
+
+        /**
+         * @return Total costs from the start to {@link #getFrom()}
+         */
+        public double getTotalCost() {
+            return this.totalCost;
+        }
+
+        /**
+         * @return Get costs from {@link #getFrom()} to {@link #getTo()})
+         */
+        public double getCost() {
+            return this.via.getWeight();
+        }
+
     }
+
+
+    // TODO implement PathNode. Iterator for path.
+    public static class Step {
+        public final Step prev;
+        public final AbstractGraph.AbstractEdge step;
+        public final double totalCost;
+
+        public Step(Step prev, AbstractGraph.AbstractEdge step, double cost) {
+            this.prev = prev;
+            this.step = step;
+            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
+        }
+
+        public Graph.Vertex getCurrent() {
+            return (prev == null) ? null : prev.getGoal();
+        }
+
+        public Graph.Vertex getGoal() {
+            return (step == null) ? null : step.goal;
+        }
+    }
+
 }

@@ -11,22 +11,22 @@ import java.util.stream.Collectors;
  * General abstract class for different Graph implementations in the hambbe.graph library.
  *
  * @param <V> Type of value in vertex
- * @param <K> Type for edges.
+ * @param <E> Type for edges.
  */
-public abstract class AbstractGraph<V, K> implements Graph<V, K> {
+public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
-    protected final List<Vertex> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
+    protected final List<VertexImpl> vertexes = new ArrayList<>(); //TODO Priority Queue with highest degree.
 
     @Override
-    public Item addVertex(V value) {
-        Vertex v = new Vertex(value, this);
+    public Vertex addVertex(V value) {
+        VertexImpl v = new VertexImpl(value, this);
         vertexes.add(v);
         return v;
     }
 
     @Override
-    public Item getItem(V value) { //TODO if this.vertex is a Tree we could have O(log n)
-        for (Vertex vertex : this.vertexes) {
+    public Vertex getItem(V value) { //TODO if this.vertex is a Tree we could have O(log n)
+        for (VertexImpl vertex : this.vertexes) {
             if (vertex.value.equals(value)) {
                 return vertex;
             }
@@ -35,88 +35,82 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
     }
 
     /**
-     * Check if item is element of this graph. Throws an {@link IllegalArgumentException} if not.
-     * @param item Item to check
+     * Check if vertex is element of this graph. Throws an {@link IllegalArgumentException} if not.
+     * @param vertex Vertex to check
      */
-    protected void checkMembership(Item item) {
-        assert item != null; // TODO throw exception if item == null?
-        if (!(item instanceof AbstractGraph.Vertex)) throw new IllegalArgumentException("Supplied Item is not a Vertex");
-        Vertex v = (Vertex) item;
-        if (v.graph != this) throw new IllegalArgumentException("Supplied Vertex not part of DirectedGraph");
+    protected void checkMembership(Vertex vertex) {
+        assert vertex != null; // TODO throw exception if vertex == null?
+        if (!(vertex instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
+        VertexImpl v = (VertexImpl) vertex;
+        if (v.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
 
     }
 
     /**
-     * Calls {@link #checkMembership(Item)} for all items.
-     * @param items Items to check.
+     * Calls {@link #checkMembership(Vertex)} for all vertexes.
+     * @param vertexes Items to check.
      */
-    protected void checkMembership(Item... items) {
-        for (Item item : items) {
-            checkMembership(item);
+    protected void checkMembership(Vertex... vertexes) {
+        for (Vertex vertex : vertexes) {
+            checkMembership(vertex);
         }
     }
 
     @Override
-    public boolean disconnect(Item from, Item to) {
+    public boolean disconnect(Vertex from, Vertex to) {
         if (from == null || to == null) return false;
         checkMembership(from, to);
-        return ((Vertex) from).disconnect((Vertex) to);
+        return ((VertexImpl) from).disconnect((VertexImpl) to);
     }
 
     @Override
-    public V getValue(Item item) {
-        checkMembership(item);
-        return ((Vertex) item).value;
+    public V getValue(Vertex vertex) {
+        checkMembership(vertex);
+        return ((VertexImpl) vertex).value;
     }
 
     @Override
-    public boolean adjacent(Item from, Item to) {
+    public boolean adjacent(Vertex from, Vertex to) {
         checkMembership(from, to);
-        for (Edge e : ((Vertex) from).edges) {
+        for (AbstractEdge e : ((VertexImpl) from).edges) {
             if (e.goal == to) return true;
         }
         return false;
     }
 
     @Override
-    public List<Item> neighbors(Item from) {
+    public List<Vertex> neighbors(Vertex from) {
         checkMembership(from);
-        return ((Vertex) from).edges.stream().map(e -> e.goal).collect(Collectors.toList());
+        return ((VertexImpl) from).edges.stream().map(e -> e.goal).collect(Collectors.toList());
     }
 
     @Override
-    public void removeVertex(Item item) {
+    public void removeVertex(Vertex vertex) {
         throw new UnsupportedOperationException("Operation is unsupported in this graph implementation because of bad run time.");
     }
 
     @Override
-    public void setValue(Item item, V newValue) {
-        checkMembership(item);
-        ((Vertex) item).value = newValue;
+    public void setValue(Vertex vertex, V newValue) {
+        checkMembership(vertex);
+        ((VertexImpl) vertex).value = newValue;
     }
 
-    // TODO implement PathNode. Iterator for path.
-    public static class Step {
-        public final Step prev;
-        public final Edge step;
-        public final double totalCost;
+    abstract class AbstractEdge implements Edge {
+        public final Vertex goal; // TODO: type VertexImpl not better here?
 
-        public Step(Step prev, Edge step, double cost) {
-            this.prev = prev;
-            this.step = step;
-            this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost; //TODO: i was confused :) really really confused - until I found this line :)
+        public abstract double getWeight();
+
+        @Override
+        public Vertex getGoal() {
+            return goal;
         }
 
-        public Item getCurrent() {
-            return (prev == null) ? null : prev.getGoal();
-        }
-
-        public Item getGoal() {
-            return (step == null) ? null : step.goal;
+        protected AbstractEdge(Vertex goal) {
+            this.goal = goal;
         }
     }
 
-    protected class Vertex implements Item, Comparator<Vertex> {
+    protected class VertexImpl implements Vertex, Comparator<VertexImpl> {
 
         protected final AbstractGraph graph;
         protected V value;
@@ -128,18 +122,18 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         protected byte marked = 0;
 
         /** adjacency list */
-        protected Set<Edge> edges = new HashSet<>(); //TODO check if HashMap best?
+        protected Set<AbstractEdge> edges = new HashSet<>(); //TODO check if HashMap best?
 
-        protected Vertex(V value, AbstractGraph graph) {
+        protected VertexImpl(V value, AbstractGraph graph) {
             this.value = value; //TODO check if has to clone
             this.graph = graph;
         }
 
-        protected void connect(Edge edge) {
+        protected void connect(AbstractEdge edge) {
             this.edges.add(edge);
         }
 
-        protected boolean disconnect(Vertex v) {
+        protected boolean disconnect(VertexImpl v) {
             return edges.removeIf(e -> e.goal == v);
         }
 
@@ -149,7 +143,7 @@ public abstract class AbstractGraph<V, K> implements Graph<V, K> {
         }
 
         @Override
-        public int compare(Vertex v1, Vertex v2) {
+        public int compare(VertexImpl v1, VertexImpl v2) {
             return v2.edges.size() - v1.edges.size();
         }
 

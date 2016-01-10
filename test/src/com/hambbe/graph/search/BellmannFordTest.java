@@ -26,13 +26,13 @@ public class BellmannFordTest extends TestCase {
     public void testBellmanFord() throws Exception {
         IntGraph<Test> graph = new IntGraph<>();
 
-        Graph.Item H = graph.addVertex(new Test(12, "Hambbe"));
-        Graph.Item I = graph.addVertex(new Test(786, "ist"));
-        Graph.Item J = graph.addVertex(new Test(34, "Jaja"));
-        Graph.Item D = graph.addVertex(new Test(56, "der"));
-        Graph.Item E = graph.addVertex(new Test(34, "Wie bitte?"));
-        Graph.Item W = graph.addVertex(new Test(45, "wahre"));
-        Graph.Item K = graph.addVertex(new Test(42, "König"));
+        Graph.Vertex H = graph.addVertex(new Test(12, "Hambbe"));
+        Graph.Vertex I = graph.addVertex(new Test(786, "ist"));
+        Graph.Vertex J = graph.addVertex(new Test(34, "Jaja"));
+        Graph.Vertex D = graph.addVertex(new Test(56, "der"));
+        Graph.Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
+        Graph.Vertex W = graph.addVertex(new Test(45, "wahre"));
+        Graph.Vertex K = graph.addVertex(new Test(42, "König"));
 
         graph.connect(H,I,1);
         graph.connect(I,D,5);

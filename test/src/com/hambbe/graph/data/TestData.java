@@ -7,12 +7,12 @@ import java.util.function.Function;
 
 public class TestData {
 
-    private static Graph.Item generateNext(IntGraph<String> graph, String current, int remaining) {
+    private static Graph.Vertex generateNext(IntGraph<String> graph, String current, int remaining) {
         if (remaining == -1) return null;
-        Graph.Item parent = null;
+        Graph.Vertex parent = null;
         if (!"".equals(current)) parent = graph.addVertex(current);
         for (char c = 'A'; c <= 'Z'; c++) {
-            Graph.Item child = generateNext(graph, current + c, remaining - 1);
+            Graph.Vertex child = generateNext(graph, current + c, remaining - 1);
             if (parent != null && child != null) {
                 graph.connect(parent, child, 1);
             }

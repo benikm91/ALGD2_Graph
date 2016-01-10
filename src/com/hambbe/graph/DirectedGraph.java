@@ -7,33 +7,33 @@ import java.util.function.Function;
  * Sub-classes may override search algorithms and improve them.
  *
  * @param <V> Type for vertexes.
- * @param <K> Type for edges.
+ * @param <E> Type for edges.
  */
-public class DirectedGraph<V, K> extends AbstractGraph<V, K> {
+public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
 
-    protected final Function<K, Double> edgeToWeight; // TODO: Edge instead of generic type K as edge?
+    protected final Function<E, Double> edgeToWeight; // TODO: Edge instead of generic type E as edge?
 
-    public DirectedGraph(Function<K, Double> edgeToWeight) {
+    public DirectedGraph(Function<E, Double> edgeToWeight) {
         if (edgeToWeight == null) throw new IllegalArgumentException("edgeToWeight can't be null");
         this.edgeToWeight = edgeToWeight;
     }
 
     @Override
-    public void connect(Item from, Item to, K edgeValue) {
+    public void connect(Vertex from, Vertex to, E edgeValue) {
         checkMembership(from, to);
-        ((Vertex) from).connect(new GenericEdge(edgeValue, (Vertex) to));
+        ((VertexImpl) from).connect(new GenericEdge(edgeValue, (VertexImpl) to));
     }
 
-    protected class GenericEdge extends Edge {
-        final K value;
+    protected class GenericEdge extends AbstractEdge {
+        final E value;
 
-        protected GenericEdge(K value, Vertex goal) {
+        protected GenericEdge(E value, VertexImpl goal) {
             super(goal);
             this.value = value;
         }
 
         @Override
-        protected double getWeight() {
+        public double getWeight() {
             return edgeToWeight.apply(this.value);
         }
     }
