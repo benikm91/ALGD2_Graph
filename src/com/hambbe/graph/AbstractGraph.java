@@ -57,6 +57,11 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     @Override
+    public void disconnect(Edge edge) {
+        throw new UnsupportedOperationException("TODO"); //TODO implement.
+    }
+
+    @Override
     public boolean disconnect(Vertex from, Vertex to) {
         if (from == null || to == null) return false;
         checkMembership(from, to);
@@ -73,7 +78,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     public boolean adjacent(Vertex from, Vertex to) {
         checkMembership(from, to);
         for (AbstractEdge e : ((VertexImpl) from).edges) {
-            if (e.goal == to) return true;
+            if (e.to == to) return true;
         }
         return false;
     }
@@ -81,12 +86,20 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     @Override
     public List<Vertex> neighbors(Vertex from) {
         checkMembership(from);
-        return ((VertexImpl) from).edges.stream().map(e -> e.goal).collect(Collectors.toList());
+        return ((VertexImpl) from).edges.stream().map(e -> e.to).collect(Collectors.toList());
     }
 
     @Override
-    public void removeVertex(Vertex vertex) {
-        throw new UnsupportedOperationException("Operation is unsupported in this graph implementation because of bad run time.");
+    public void removeVertex(Vertex toRemove) {
+        checkMembership(toRemove);
+        for (VertexImpl vertex : this.vertexes) {
+            for (AbstractEdge edge : vertex.edges) {
+                if (edge.getTo() == toRemove) {
+                    this.disconnect(edge);
+                }
+            }
+        }
+        vertexes.remove(toRemove);
     }
 
     @Override
@@ -96,17 +109,24 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     abstract class AbstractEdge implements Edge {
-        public final Vertex goal; // TODO: type VertexImpl not better here?
+        public final Vertex from;
+        public final Vertex to; // TODO: type VertexImpl not better here?
 
         public abstract double getWeight();
 
         @Override
-        public Vertex getGoal() {
-            return goal;
+        public Vertex getTo() {
+            return this.to;
         }
 
-        protected AbstractEdge(Vertex goal) {
-            this.goal = goal;
+        @Override
+        public Vertex getFrom() {
+            return this.from;
+        }
+
+        protected AbstractEdge(Vertex from, Vertex to) {
+            this.from = to;
+            this.to = to;
         }
     }
 
@@ -134,7 +154,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
 
         protected boolean disconnect(VertexImpl v) {
-            return edges.removeIf(e -> e.goal == v);
+            return edges.removeIf(e -> e.to == v);
         }
 
         @Override

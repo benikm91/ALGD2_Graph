@@ -20,14 +20,20 @@ public interface Graph<V, E> {
     void connect(Vertex from, Vertex to, E edgeValue);
 
     /**
+     * Remove an edge.
+     * @param edge Remove edge.
+     */
+    void disconnect(Edge edge);
+
+    /**
      * Disconnect two directly connected {@link Vertex}.
-     * Removes first direct connection found from <tt>from</tt> to <tt>to</tt>.
+     * Removes all  connection found from <tt>from</tt> to <tt>to</tt>.
      *
      * Direct connection : Reachable with one step.
      *
      * @param from .
      * @param to .
-     * @return True, if successfully removed. False, otherwise (e.g. Edge not found).
+     * @return True, if successfully removed edge(s). False, otherwise (e.g. Edge not found).
      */
     boolean disconnect(Vertex from, Vertex to);
 
@@ -87,7 +93,8 @@ public interface Graph<V, E> {
 
     interface Edge {
 
-        Vertex getGoal();
+        Vertex getTo();
+        Vertex getFrom();
         double getWeight();
 
     }

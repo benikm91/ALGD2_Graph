@@ -14,9 +14,10 @@ package com.hambbe.graph;
 public class IntGraph<V> extends AbstractGraph<V, Integer> {
 
     @Override
-    public void connect(Vertex from, Vertex to, Integer edgeValue) {
-        checkMembership(from, to);
-        ((VertexImpl) from).connect(new IntEdge(edgeValue, (VertexImpl) to));
+    public void connect(Vertex pFrom, Vertex pTo, Integer edgeValue) {
+        checkMembership(pFrom, pTo);
+        VertexImpl from = (VertexImpl) pFrom;
+        from.connect(new IntEdge(edgeValue, from, (VertexImpl)pTo));
     }
 
     /**
@@ -25,8 +26,8 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
     protected class IntEdge extends AbstractEdge {
         protected final int weight;
 
-        protected IntEdge(int weight, VertexImpl goal) {
-            super(goal);
+        protected IntEdge(int weight, VertexImpl from, VertexImpl to) {
+            super(from, to);
             this.weight = weight;
         }
 

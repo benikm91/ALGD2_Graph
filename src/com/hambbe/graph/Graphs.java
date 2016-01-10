@@ -23,7 +23,7 @@ public class Graphs {
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
-            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) p.step.goal;
+            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) p.step.to;
             if (next.isMarked()) continue;
             if (next == to) {
                 result = p;
@@ -35,10 +35,10 @@ public class Graphs {
         graph.vertexes.forEach(AbstractGraph.VertexImpl::demark);
         if (result == null) return null;
 
-        // Build route between start and goal item
+        // Build route between start and to item
         LinkedList<Link> route = new LinkedList<>();
         for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(new Link(from, prev.step, prev.totalCost));
+            route.addFirst(new Link(prev.step, prev.totalCost));
         }
         return route;
     }
@@ -138,15 +138,15 @@ public class Graphs {
             return null;
         }
 
-        // Return null if the goal is unreachable from the given start item
+        // Return null if the to is unreachable from the given start item
         if (V.get(pTo).totalCost == Double.MAX_VALUE) {
             return null;
         }
 
-        // Build route between start and goal item
+        // Build route between start and to item
         LinkedList<Link> route = new LinkedList<>();
         for (BellmanFordNode curr = V.get(pTo); curr != null; curr = curr.from) {
-            route.addFirst(new Link(curr.from.value, curr.via, curr.totalCost));
+            route.addFirst(new Link(curr.via, curr.totalCost));
         }
         return route;
     }
@@ -170,9 +170,9 @@ public class Graphs {
             for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
                 for (AbstractGraph.AbstractEdge e : vertex.edges) {
                     BellmanFordNode u = V.get(vertex);
-                    BellmanFordNode v = V.get(e.goal);
+                    BellmanFordNode v = V.get(e.to);
                     if (u.totalCost + e.getWeight() < v.totalCost) {
-                        V.put(e.goal, new BellmanFordNode(e.goal, u, e, e.getWeight()));
+                        V.put(e.to, new BellmanFordNode(e.to, u, e, e.getWeight()));
                     }
                 }
             }
@@ -181,7 +181,7 @@ public class Graphs {
         for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
             for (AbstractGraph.AbstractEdge e : vertex.edges) {
                 BellmanFordNode u = V.get(vertex);
-                BellmanFordNode v = V.get(e.goal);
+                BellmanFordNode v = V.get(e.to);
                 if (u.totalCost + e.getWeight() < v.totalCost) {
                     return null;
                 }
@@ -207,13 +207,11 @@ public class Graphs {
     }
 
     public static class Link {
-        public final Graph.Vertex from;
         public final Graph.Edge via;
         public final double totalCost;
 
-        public Link(Graph.Vertex from, Graph.Edge via, double totalCost) {
+        public Link(Graph.Edge via, double totalCost) {
             assert via != null : "Edge can't be null.";
-            this.from = from;
             this.via = via;
             this.totalCost = totalCost;
         }
@@ -222,14 +220,14 @@ public class Graphs {
          * @return Get Item from where the link starts.
          */
         public Graph.Vertex getFrom() {
-            return this.from;
+            return this.via.getFrom();
         }
 
         /**
          * @return Get Item where the link ends.
          */
         public Graph.Vertex getTo() {
-            return this.via.getGoal();
+            return this.via.getTo();
         }
 
         /**
@@ -273,7 +271,7 @@ public class Graphs {
         }
 
         public Graph.Vertex getGoal() {
-            return (step == null) ? null : step.goal;
+            return (step == null) ? null : step.to;
         }
     }
 
