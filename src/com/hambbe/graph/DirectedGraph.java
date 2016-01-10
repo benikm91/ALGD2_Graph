@@ -19,16 +19,17 @@ public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
     }
 
     @Override
-    public void connect(Vertex from, Vertex to, E edgeValue) {
-        checkMembership(from, to);
-        ((VertexImpl) from).connect(new GenericEdge(edgeValue, (VertexImpl) to));
+    public void connect(Vertex pFrom, Vertex pTo, E edgeValue) {
+        checkMembership(pFrom, pTo);
+        final VertexImpl from = (VertexImpl) pFrom;
+        from.connect(new GenericEdge(edgeValue, from, (VertexImpl) pTo, this));
     }
 
     protected class GenericEdge extends AbstractEdge {
         final E value;
 
-        protected GenericEdge(E value, VertexImpl goal) {
-            super(goal);
+        protected GenericEdge(E value, VertexImpl from, VertexImpl to, DirectedGraph graph) {
+            super(from, to, graph);
             this.value = value;
         }
 

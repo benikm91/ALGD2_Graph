@@ -35,7 +35,7 @@ public class Main {
         System.out.print(graph.getValue(basel));
         double lastCost = 0;
         for (Graphs.Link s : route) {
-            System.out.print(" -" + (s.totalCost - lastCost) + "-> " + graph.getValue(s.to));
+            System.out.print(" -" + (s.totalCost - lastCost) + "-> " + graph.getValue(s.getTo()));
             lastCost = s.totalCost;
         }
         System.out.print(" ( = " + lastCost + " )" );

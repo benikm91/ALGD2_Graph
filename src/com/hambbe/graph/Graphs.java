@@ -23,7 +23,7 @@ public class Graphs {
         Step result = null;
         while (!pq.isEmpty() && result == null) {
             final Step p = pq.poll();
-            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) p.step.goal;
+            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) p.step.to;
             if (next.isMarked()) continue;
             if (next == to) {
                 result = p;
@@ -35,10 +35,10 @@ public class Graphs {
         graph.vertexes.forEach(AbstractGraph.VertexImpl::demark);
         if (result == null) return null;
 
-        // Build route between start and goal item
+        // Build route between start and to item
         LinkedList<Link> route = new LinkedList<>();
         for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(new Link(from, prev.step, prev.totalCost));
+            route.addFirst(new Link(prev.step, prev.totalCost));
         }
         return route;
     }
@@ -131,65 +131,24 @@ public class Graphs {
      */
     public static <V, E> List<Link> bellmanFord(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom, final Graph.Vertex pTo) {
         //graph.checkMembership(pFrom, pTo);
-        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
+        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFord(graph, pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
         if (V == null) {
             return null;
         }
 
-        // Return null if the goal is unreachable from the given start item
+        // Return null if the to is unreachable from the given start item
         if (V.get(pTo).totalCost == Double.MAX_VALUE) {
             return null;
         }
 
-        // Build route between start and goal item
+        // Build route between start and to item
         LinkedList<Link> route = new LinkedList<>();
         for (BellmanFordNode curr = V.get(pTo); curr != null; curr = curr.from) {
-            route.addFirst(new Link(curr.from.value, curr.via, curr.totalCost));
+            route.addFirst(new Link(curr.via, curr.totalCost));
         }
         return route;
-    }
-
-    /**
-     * Bellman Ford algorithm implementation
-     *
-     * Finds the shortest path between a vertex and all other edges.
-     * Other then the Dijkstra algorithm, Bellman Ford also works with negative
-     * edge values. The trade-off is a runtime complexity of O(|V|*|E|).
-     * The algorithm fails if there is a cycle with negative total values has been found.
-     *
-     * @param graph The graph
-     * @param pFrom Starting vertex
-     * @param <V> Generic vertex type
-     * @param <K> Generic edge type
-     * @return List routes to all reachable items, if there was no cycle with negative edges on the way. Null, otherwise.
-     */
-    public static <V, K> List<List<Link>> bellmanFord(final AbstractGraph<V, K> graph, final Graph.Item pFrom) {
-        HashMap<Graph.Item, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
-
-        // Return null if the bellman-ford algorithm wasn't successful
-        if (V == null) {
-            return null;
-        }
-
-        List<List<Link>> routes = new LinkedList<>();
-
-        for (Graph.Item vertex : graph.vertexes) {
-            // Skip if the goal is unreachable from the given start item
-            if (V.get(vertex).totalCost == Double.MAX_VALUE || vertex.equals(pFrom)) {
-                continue;
-            }
-
-            // Build route between start and goal item
-            LinkedList<Link> route = new LinkedList<>();
-            for (BellmanFordNode curr = V.get(vertex); curr != null; curr = curr.from) {
-                route.addFirst(new Link(curr.from.value, curr.value, curr.via, curr.totalCost));
-            }
-            routes.add(route);
-        }
-
-        return routes;
     }
 
     /**
@@ -200,7 +159,8 @@ public class Graphs {
      * @param <E>
      * @return
      */
-    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom) {
+    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFord(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom) {
+        //graph.checkMembership(pFrom);
         final AbstractGraph.VertexImpl from = (AbstractGraph<V, E>.VertexImpl) pFrom;
 
         HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
@@ -210,9 +170,9 @@ public class Graphs {
             for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
                 for (AbstractGraph.AbstractEdge e : vertex.edges) {
                     BellmanFordNode u = V.get(vertex);
-                    BellmanFordNode v = V.get(e.goal);
+                    BellmanFordNode v = V.get(e.to);
                     if (u.totalCost + e.getWeight() < v.totalCost) {
-                        V.put(e.goal, new BellmanFordNode(e.goal, u, e, e.getWeight()));
+                        V.put(e.to, new BellmanFordNode(e.to, u, e, e.getWeight()));
                     }
                 }
             }
@@ -221,7 +181,7 @@ public class Graphs {
         for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
             for (AbstractGraph.AbstractEdge e : vertex.edges) {
                 BellmanFordNode u = V.get(vertex);
-                BellmanFordNode v = V.get(e.goal);
+                BellmanFordNode v = V.get(e.to);
                 if (u.totalCost + e.getWeight() < v.totalCost) {
                     return null;
                 }
@@ -247,14 +207,11 @@ public class Graphs {
     }
 
     public static class Link {
-        public final Graph.Vertex from;
         public final Graph.Edge via;
         public final double totalCost;
 
-        public Link(Graph.Vertex from, Graph.Edge via, double totalCost) {
+        public Link(Graph.Edge via, double totalCost) {
             assert via != null : "Edge can't be null.";
-            this.from = from;
-            this.to = to;
             this.via = via;
             this.totalCost = totalCost;
         }
@@ -263,14 +220,14 @@ public class Graphs {
          * @return Get Item from where the link starts.
          */
         public Graph.Vertex getFrom() {
-            return this.from;
+            return this.via.getFrom();
         }
 
         /**
          * @return Get Item where the link ends.
          */
         public Graph.Vertex getTo() {
-            return this.via.getGoal();
+            return this.via.getTo();
         }
 
         /**
@@ -314,7 +271,7 @@ public class Graphs {
         }
 
         public Graph.Vertex getGoal() {
-            return (step == null) ? null : step.goal;
+            return (step == null) ? null : step.to;
         }
     }
 

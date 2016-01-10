@@ -29,6 +29,11 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
     }
 
     @Override
+    public void disconnect(Edge edge) {
+        graph.disconnect(edge);
+    }
+
+    @Override
     public boolean disconnect(Vertex from, Vertex to) {
         return graph.disconnect(from, to);
     }

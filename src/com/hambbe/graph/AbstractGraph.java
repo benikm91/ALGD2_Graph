@@ -35,78 +35,129 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     /**
-     * Check if vertex is element of this graph. Throws an {@link IllegalArgumentException} if not.
-     * @param vertex Vertex to check
+     * Check if edge is element of this graph. Throws an {@link IllegalArgumentException} if not.
+     * @param pEdge Edge to check
      */
-    protected void checkMembership(Vertex vertex) {
-        assert vertex != null; // TODO throw exception if vertex == null?
-        if (!(vertex instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
-        VertexImpl v = (VertexImpl) vertex;
-        if (v.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
+    protected void checkMembership(final Edge pEdge) {
+        assert pEdge != null; // TODO throw exception if vertex == null?
+        if (!(pEdge instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
+        final AbstractEdge edge = (AbstractEdge) pEdge;
+        if (edge.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
 
+    }
+
+    /**
+     * Check if vertex is element of this graph. Throws an {@link IllegalArgumentException} if not.
+     * @param pVertex Vertex to check
+     */
+    protected void checkMembership(final Vertex pVertex) {
+        assert pVertex != null; // TODO throw exception if vertex == null?
+        if (!(pVertex instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
+        final VertexImpl vertex = (VertexImpl) pVertex;
+        if (vertex.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
+    }
+
+    /**
+     * Calls {@link #checkMembership(Edge)} for all edges.
+     * @param edges Edges to check.
+     */
+    protected void checkMembership(final Edge... edges) {
+        for (Edge edge : edges) {
+            checkMembership(edge);
+        }
     }
 
     /**
      * Calls {@link #checkMembership(Vertex)} for all vertexes.
      * @param vertexes Items to check.
      */
-    protected void checkMembership(Vertex... vertexes) {
+    protected void checkMembership(final Vertex... vertexes) {
         for (Vertex vertex : vertexes) {
             checkMembership(vertex);
         }
     }
 
     @Override
-    public boolean disconnect(Vertex from, Vertex to) {
+    public void disconnect(final Edge edge) {
+        checkMembership(edge);
+        final VertexImpl from = (VertexImpl) edge.getFrom();
+        from.edges.removeIf(e -> e == edge);
+    }
+
+    @Override
+    public boolean disconnect(final Vertex from, final Vertex to) {
         if (from == null || to == null) return false;
         checkMembership(from, to);
         return ((VertexImpl) from).disconnect((VertexImpl) to);
     }
 
     @Override
-    public V getValue(Vertex vertex) {
+    public V getValue(final Vertex vertex) {
         checkMembership(vertex);
         return ((VertexImpl) vertex).value;
     }
 
     @Override
-    public boolean adjacent(Vertex from, Vertex to) {
+    public boolean adjacent(final Vertex from, final Vertex to) {
         checkMembership(from, to);
         for (AbstractEdge e : ((VertexImpl) from).edges) {
-            if (e.goal == to) return true;
+            if (e.to == to) return true;
         }
         return false;
     }
 
     @Override
-    public List<Vertex> neighbors(Vertex from) {
+    public List<Vertex> neighbors(final Vertex from) {
         checkMembership(from);
-        return ((VertexImpl) from).edges.stream().map(e -> e.goal).collect(Collectors.toList());
+        return ((VertexImpl) from).edges.stream().map(e -> e.to).collect(Collectors.toList());
     }
 
     @Override
-    public void removeVertex(Vertex vertex) {
-        throw new UnsupportedOperationException("Operation is unsupported in this graph implementation because of bad run time.");
+    public void removeVertex(final Vertex pToRemove) {
+        checkMembership(pToRemove);
+        final VertexImpl toRemove = (VertexImpl) pToRemove;
+        for (VertexImpl vertex : this.vertexes) {
+//            TODO Which is faster?
+//            vertex.edges.stream()
+//                    .filter(edge -> edge.getTo() == toRemove)
+//                    .forEach(this::disconnect);
+            for (AbstractEdge edge : vertex.edges) {
+                if (edge.getTo() == toRemove) {
+                    this.disconnect(edge);
+                }
+            }
+        }
+        vertexes.remove(toRemove);
     }
 
     @Override
-    public void setValue(Vertex vertex, V newValue) {
+    public void setValue(final Vertex vertex, final V newValue) {
         checkMembership(vertex);
         ((VertexImpl) vertex).value = newValue;
     }
 
     abstract class AbstractEdge implements Edge {
-        public final Vertex goal; // TODO: type VertexImpl not better here?
+        public final AbstractGraph graph;
+
+        public final Vertex from;
+        public final Vertex to; // TODO: type VertexImpl not better here?
 
         public abstract double getWeight();
 
         @Override
-        public Vertex getGoal() {
-            return goal;
+        public Vertex getTo() {
+            return this.to;
         }
 
-        protected AbstractEdge(Vertex goal) {
-            this.goal = goal;
+        @Override
+        public Vertex getFrom() {
+            return this.from;
+        }
+
+        protected AbstractEdge(Vertex from, Vertex to, AbstractGraph graph) {
+            this.from = from;
+            this.to = to;
+            this.graph = graph;
         }
     }
 
@@ -134,7 +185,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
 
         protected boolean disconnect(VertexImpl v) {
-            return edges.removeIf(e -> e.goal == v);
+            return edges.removeIf(e -> e.to == v);
         }
 
         @Override

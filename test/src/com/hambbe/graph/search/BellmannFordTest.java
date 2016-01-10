@@ -47,7 +47,7 @@ public class BellmannFordTest extends TestCase {
 //
 //        assertNotNull("No route found!", route);
 //
-//        String res = route.stream().map(s -> graph.getValue(s.getGoal()).name).reduce((s,a) -> s + " " + a).get();
+//        String res = route.stream().map(s -> graph.getValue(s.getTo()).name).reduce((s,a) -> s + " " + a).get();
 //
 //        assertEquals("Not expected result!", "Hambbe ist der wahre König", res);
 
