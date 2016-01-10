@@ -74,5 +74,5 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public List<Vertex> getVertexes() { return graph.getVertexes(); }
+    public List<? extends Vertex> getVertexes() { return graph.getVertexes(); }
 }
