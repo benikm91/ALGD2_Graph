@@ -129,26 +129,66 @@ public class Graphs {
      * @param <E> Generic edge type
      * @return Route to item, if exists and there was no cycle with negative edges on the way. Null, otherwise.
      */
-    public static <V, E> List<Link> bellmanFord(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom, final Graph.Vertex pTo) {
-        //graph.checkMembership(pFrom, pTo);
-        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFord(graph, pFrom);
+    public static <V, E> List<Link> bellmanFord(final Graph<V, E> graph, final Graph.Vertex pFrom, final Graph.Vertex pTo) {
+        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
         if (V == null) {
             return null;
         }
 
-        // Return null if the to is unreachable from the given start item
+        // Return null if the goal is unreachable from the given start item
         if (V.get(pTo).totalCost == Double.MAX_VALUE) {
             return null;
         }
 
-        // Build route between start and to item
+        // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
         for (BellmanFordNode curr = V.get(pTo); curr != null; curr = curr.from) {
             route.addFirst(new Link(curr.via, curr.totalCost));
         }
         return route;
+    }
+
+    /**
+     * Bellman Ford algorithm implementation
+     *
+     * Finds the shortest path between a vertex and all other edges.
+     * Other then the Dijkstra algorithm, Bellman Ford also works with negative
+     * edge values. The trade-off is a runtime complexity of O(|V|*|E|).
+     * The algorithm fails if there is a cycle with negative total values has been found.
+     *
+     * @param graph The graph
+     * @param pFrom Starting vertex
+     * @param <V> Generic vertex type
+     * @param <K> Generic edge type
+     * @return List routes to all reachable items, if there was no cycle with negative edges on the way. Null, otherwise.
+     */
+    public static <V, K> List<List<Link>> bellmanFord(final Graph<V, K> graph, final Graph.Vertex pFrom) {
+        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
+
+        // Return null if the bellman-ford algorithm wasn't successful
+        if (V == null) {
+            return null;
+        }
+
+        List<List<Link>> routes = new LinkedList<>();
+
+        for (Graph.Vertex vertex : graph.getVertexes()) {
+            // Skip if the goal is unreachable from the given start item
+            if (V.get(vertex).totalCost == Double.MAX_VALUE || vertex.equals(pFrom)) {
+                continue;
+            }
+
+            // Build route between start and goal item
+            LinkedList<Link> route = new LinkedList<>();
+            for (BellmanFordNode curr = V.get(vertex); curr != null; curr = curr.from) {
+                route.addFirst(new Link(curr.via, curr.totalCost));
+            }
+            routes.add(route);
+        }
+
+        return routes;
     }
 
     /**
@@ -159,29 +199,26 @@ public class Graphs {
      * @param <E>
      * @return
      */
-    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFord(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom) {
-        //graph.checkMembership(pFrom);
-        final AbstractGraph.VertexImpl from = (AbstractGraph<V, E>.VertexImpl) pFrom;
-
+    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
         HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
-        graph.vertexes.forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (from == v) ? 0 : Double.MAX_VALUE)));
+        graph.getVertexes().forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (pFrom == v) ? 0 : Double.MAX_VALUE)));
 
-        for (int i = 0; i < graph.vertexes.size() - 1; i++) {
-            for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
-                for (AbstractGraph.AbstractEdge e : vertex.edges) {
+        for (int i = 0; i < graph.getVertexes().size() - 1; i++) {
+            for (Graph.Vertex vertex : graph.getVertexes()) {
+                for (Graph.Edge e : vertex.getEdges()) {
                     BellmanFordNode u = V.get(vertex);
-                    BellmanFordNode v = V.get(e.to);
+                    BellmanFordNode v = V.get(e.getTo());
                     if (u.totalCost + e.getWeight() < v.totalCost) {
-                        V.put(e.to, new BellmanFordNode(e.to, u, e, e.getWeight()));
+                        V.put(e.getTo(), new BellmanFordNode(e.getTo(), u, e, u.totalCost + e.getWeight()));
                     }
                 }
             }
         }
 
-        for (AbstractGraph<V, E>.VertexImpl vertex : graph.vertexes) {
-            for (AbstractGraph.AbstractEdge e : vertex.edges) {
+        for (Graph.Vertex vertex : graph.getVertexes()) {
+            for (Graph.Edge e : vertex.getEdges()) {
                 BellmanFordNode u = V.get(vertex);
-                BellmanFordNode v = V.get(e.to);
+                BellmanFordNode v = V.get(e.getTo());
                 if (u.totalCost + e.getWeight() < v.totalCost) {
                     return null;
                 }

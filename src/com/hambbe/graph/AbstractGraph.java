@@ -34,6 +34,11 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         return null;
     }
 
+    @Override
+    public List<Vertex> getVertexes() {
+        return this.vertexes;
+    }
+
     /**
      * Check if edge is element of this graph. Throws an {@link IllegalArgumentException} if not.
      * @param pEdge Edge to check
@@ -218,6 +223,10 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
             this.marked = marked;
         }
 
+        @Override
+        public Set<Edge> getEdges() {
+            return edges;
+        }
     }
 
 }

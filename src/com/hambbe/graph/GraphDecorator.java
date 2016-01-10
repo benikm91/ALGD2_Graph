@@ -72,4 +72,7 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
     public void setValue(Vertex vertex, V newValue) {
         setValue(vertex, newValue);
     }
+
+    @Override
+    public List<Vertex> getVertexes() { return graph.getVertexes(); }
 }
