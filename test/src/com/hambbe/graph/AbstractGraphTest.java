@@ -99,8 +99,6 @@ public class AbstractGraphTest {
         for (int i = 0; i < chars1.length; i++) {
             hash1 = hash1 ^ ((int)chars1[i]*i);
         }*/
-        //assertEquals("Unexpected amount of edges", count1, count2);
-        //assertEquals("Unexpected order of edges", hash1, hash2 + 1);
 
         StringBuilder sb = new StringBuilder();
         int count = 0, hash = 0;
@@ -117,8 +115,11 @@ public class AbstractGraphTest {
             hash = hash ^ ((int)chars2[i]*i);
         }
 
+        /*assertEquals("Unexpected amount of edges", count1, count);
+        assertEquals("Unexpected order of edges", hash1, hash + 1);*/
+
         assertEquals("Unexpected amount of edges", 676, count);
-        assertEquals("Unexpected order of edges", 3176526, hash);
+        assertEquals("Unexpected order of edges", 3786346, hash);
 
         Iterable<? extends Graph.Edge> edges = graph.getEdges();
 
