@@ -6,6 +6,8 @@ package com.hambbe.graph;
  *
  * It is more memory efficient than a {@link DirectedGraph}, because it uses a value type for its edge weights.
  *
+ * If using an Integer for edge weight, always this implementation must be used for efficiency.
+ *
  * @param <V> Type of value in vertex
  *
  * @author Benjamin Meyer
@@ -14,10 +16,12 @@ package com.hambbe.graph;
 public class IntGraph<V> extends AbstractGraph<V, Integer> {
 
     @Override
-    public void connect(final Vertex pFrom, final Vertex pTo, final Integer edgeValue) {
+    public Edge connect(final Vertex pFrom, final Vertex pTo, final Integer edgeValue) {
         checkMembership(pFrom, pTo);
         final VertexImpl from = (VertexImpl) pFrom;
-        from.connect(new IntEdge(edgeValue, from, (VertexImpl) pTo, this));
+        IntEdge edge = new IntEdge(edgeValue, from, (VertexImpl) pTo, this);
+        from.connect(edge);
+        return edge;
     }
 
     @Override
@@ -31,8 +35,16 @@ public class IntGraph<V> extends AbstractGraph<V, Integer> {
      * Edge implementation with value type <tt>int</tt> as weight.
      */
     protected class IntEdge extends AbstractEdge {
+
+        /** Edge weight. */
         protected final int weight;
 
+        /**
+         * @param weight Field value.
+         * @param from Field value.
+         * @param to Field value.
+         * @param graph Field value.
+         */
         protected IntEdge(final int weight, final VertexImpl from, final VertexImpl to, final IntGraph<V> graph) {
             super(from, to, graph);
             this.weight = weight;

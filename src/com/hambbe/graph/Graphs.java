@@ -6,39 +6,55 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.function.Function;
 
+/**
+ * Contains implementations for known graph search algorithms.
+ * Is not Thread save.
+ */
 public class Graphs {
 
     /**
      * Helper function for different graph search implementations.
+     * Uses helper class {@link com.hambbe.graph.Graphs.Step} for finding path,
+     * but returns List of Link values for the user.
+     * Implementation is searching from pFrom only.
+     *
+     * @param graph Graph to search in.
      * @param pFrom VertexImpl we are starting at.
-     * @param pq Initialized priority queue.
+     * @param pq Initialized priority queue according to current search algorithm.
      * @param pTo VertexImpl we are looking for.
-     * @return Route to vertex, if exists. Null, otherwise.
+     * @param <V> Value type of vertex in graph.
+     * @param <E> Value type of edge in graph.
+     * @return Route of vertexes, if exists. Empty, if to == from. Null, otherwise.
      */
-    protected static <V, E> List<Link> graphSearch(final AbstractGraph<V, E> graph, Graph.Vertex pFrom, PriorityQueue<Step> pq, Graph.Vertex pTo) {
+    protected static <V, E> List<Link> graphSearch(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom, final PriorityQueue<Step> pq, final Graph.Vertex pTo) {
         final AbstractGraph<V, E>.VertexImpl from = (AbstractGraph<V, E>.VertexImpl) pFrom;
         final AbstractGraph<V, E>.VertexImpl to = (AbstractGraph<V, E>.VertexImpl) pTo;
-        if (from == to) return new LinkedList<>();
+        if (from == to) return new LinkedList<>(); // nothing must be do, to reach to.
+        // Add init values (neighbours of from).
         from.edges.forEach(e -> pq.add(new Step(null, e, e.getWeight())));
         Step result = null;
         while (!pq.isEmpty() && result == null) {
-            final Step p = pq.poll();
-            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) p.step.to;
+            // Get best candidate for search.
+            final Step currentStep = pq.poll();
+            final AbstractGraph<V, E>.VertexImpl next = (AbstractGraph<V, E>.VertexImpl) currentStep.edge.to;
             if (next.isMarked()) continue;
             if (next == to) {
-                result = p;
+                result = currentStep;
             } else {
                 next.mark();
-                next.edges.forEach(e -> pq.add(new Step(p, e, e.getWeight())));
+                // add children of currentStep to PriorityQueue.
+                next.edges.forEach(e -> pq.add(new Step(currentStep, e, e.getWeight())));
             }
         }
+        // Clean up - Delete marking on vertexes.
         graph.vertexes.forEach(AbstractGraph.VertexImpl::demark);
-        if (result == null) return null;
+        if (result == null) return null; // Nothing found.
 
         // Build route between start and to item
         LinkedList<Link> route = new LinkedList<>();
+        // result is actually last step of the hole path, so we go back and add all steps at the front, therefore last step automatically moves to the end of the list.
         for (Step prev = result; prev != null; prev = prev.prev) {
-            route.addFirst(new Link(prev.step, prev.totalCost));
+            route.addFirst(new Link(prev.edge, prev.totalCost));
         }
         return route;
     }
@@ -49,6 +65,7 @@ public class Graphs {
      * It finds an existing path.
      * It does not guarantee the optimal path.
      *
+     * @param graph Graph to search in.
      * @param from Start item.
      * @param to Goal item.
      * @param heuristic Heuristic function for prioritizing items.
@@ -73,6 +90,7 @@ public class Graphs {
      * <li>All step costs have to be positive.
      * </ul>
      *
+     * @param graph Graph to search in.
      * @param from Start item.
      * @param to Goal item.
      * @return Route to item, if exists. Null, otherwise.
@@ -192,12 +210,11 @@ public class Graphs {
     }
 
     /**
-     *
-     * @param graph
-     * @param pFrom
-     * @param <V>
-     * @param <E>
-     * @return
+     * @param graph The graph
+     * @param pFrom Starting vertex
+     * @param <V> Generic vertex type
+     * @param <E> Generic edge type
+     * @return HashMap with all shortest paths from pFrom to all vertexes in the graph. Vertex is the key to get to the path.
      */
     protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
         HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
@@ -227,15 +244,19 @@ public class Graphs {
         return V;
     }
 
-    /**"
-     *
+    /**
+     * Internal node helping for bellman ford algorithm.
      */
     protected static class BellmanFordNode {
-        Graph.Vertex value;
-        BellmanFordNode from;
-        Graph.Edge via;
-        double totalCost;
-        public BellmanFordNode(Graph.Vertex value, BellmanFordNode from, Graph.Edge via, double totalCost) {
+        /** Current vertex.. */
+        final Graph.Vertex value;
+        /** Node i came from. */
+        final BellmanFordNode from;
+        /** Edge i used to get here. */
+        final Graph.Edge via;
+        /** Total cost till now. */
+        final double totalCost;
+        public BellmanFordNode(final Graph.Vertex value, final BellmanFordNode from, final Graph.Edge via, final double totalCost) {
             this.value = value;
             this.from = from;
             this.via = via;
@@ -243,13 +264,25 @@ public class Graphs {
         }
     }
 
+    /**
+     * Link is used to give a user all the data he needs after a graph search algorithms terminates.
+     *
+     * Link represents a step in the graph from one vertex to another using a edge as well as a cost.
+     * A link also know the cost previous links had to get to this link.
+     */
     public static class Link {
-        public final Graph.Edge edge;
-        public final double totalCost;
+        /** Edge used. */
+        private final Graph.Edge edge;
+        /** Total costs including current link. */
+        private final double totalCost;
 
-        public Link(final Graph.Edge via, final double totalCost) {
-            assert via != null : "Edge can't be null.";
-            this.edge = via;
+        /**
+         * @param edge Field value.
+         * @param totalCost Field value.
+         */
+        protected Link(final Graph.Edge edge, final double totalCost) {
+            assert edge != null : "Edge can't be null.";
+            this.edge = edge;
             this.totalCost = totalCost;
         }
 
@@ -290,14 +323,28 @@ public class Graphs {
 
     }
 
-    public static class Step {
+    /**
+     * Helper class for several graph searches.
+     */
+    protected static class Step {
+
+        /** Previous step. How did we end up here! */
         public final Step prev;
-        public final AbstractGraph.AbstractEdge step;
+
+        /** Current step to use. */
+        public final AbstractGraph.AbstractEdge edge;
+
+        /** Total costs including current step. */
         public final double totalCost;
 
-        public Step(Step prev, AbstractGraph.AbstractEdge step, double cost) {
+        /**
+         * @param prev Previous path.
+         * @param edge Current edge.
+         * @param cost Cost of this step.
+         */
+        public Step(final Step prev, final AbstractGraph.AbstractEdge edge, final double cost) {
             this.prev = prev;
-            this.step = step;
+            this.edge = edge;
             this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost;
         }
 
@@ -306,7 +353,7 @@ public class Graphs {
         }
 
         public Graph.Vertex getGoal() {
-            return (step == null) ? null : step.to;
+            return (edge == null) ? null : edge.to;
         }
     }
 

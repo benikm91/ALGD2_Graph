@@ -24,8 +24,8 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
     }
 
     @Override
-    public void connect(Vertex from, Vertex to, E edgeValue) {
-        graph.connect(from, to, edgeValue);
+    public Edge connect(Vertex from, Vertex to, E edgeValue) {
+        return graph.connect(from, to, edgeValue);
     }
 
     @Override

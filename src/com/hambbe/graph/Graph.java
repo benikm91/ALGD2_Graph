@@ -3,8 +3,14 @@ package com.hambbe.graph;
 import java.util.List;
 
 /**
- * Interface for all graph implementation of the hambbe.graph library.
+ * Interface for graph implementation.
  *
+ * When implementing there have to be hidden inner vertex and edge classes.
+ * For pointing to vertexes and edges from a graph implementation use following the interfaces:
+ * <ul>
+ * <li>{@link com.hambbe.graph.Graph.Edge}
+ * <li>{@link com.hambbe.graph.Graph.Vertex}
+ * </ul>
  * @param <V> Type of value in vertex.
  * @param <E> Type for edges.
  */
@@ -16,8 +22,10 @@ public interface Graph<V, E> {
      * @param from .
      * @param to .
      * @param edgeValue The edge value.
+     *
+     * @return Connecting edge.
      */
-    void connect(Vertex from, Vertex to, E edgeValue);
+    Edge connect(Vertex from, Vertex to, E edgeValue);
 
     /**
      * Remove an edge.
@@ -71,8 +79,15 @@ public interface Graph<V, E> {
      */
     V getValue(Vertex vertex);
 
+    /**
+     * @param edge Edge to get value from.
+     * @return Value of edge.
+     */
     E getEdgeValue(Edge edge);
 
+    /**
+     * @return Number of vertexes in Graph.
+     */
     int getVertexCount();
 
     /**
@@ -83,27 +98,27 @@ public interface Graph<V, E> {
     void setValue(Vertex vertex, V newValue);
 
     /**
-     * Get degree of vertex
+     * Degree represents the number of outgoing edges from a vertex.
+     * @param vertex Vertex to get degree from.
      * @return The degree
      */
     int degree(Vertex vertex);
 
     /**
-     * Get all vertexes stored in this graph
+     * Get all vertexes stored in this graph.
      * @return Iterable of vertexes
      */
     Iterable<? extends Vertex> getVertexes();
 
     /**
-     * Get all edges stored in this graph
+     * Get all edges stored in this graph.
      * @return Iterable of edges
      */
     Iterable<? extends Edge> getEdges();
 
     /***
-     * Public Vertex for referencing vertexes in the AbstractGraph implementations after the ... principle.
-     * AbstractGraph implementations have to implement this interface into there vertex inner class,
-     * so a vertex can be referenced from outside the graph.
+     * Public vertex for referencing vertexes in a <ll>Graph</ll> implementations after the item principle.
+     * Graph implementations have to implement this interface for there hidden vertex inner class.
      */
     interface Vertex {
 
@@ -114,6 +129,10 @@ public interface Graph<V, E> {
 
     }
 
+    /***
+     * Public edge for referencing edges in a <ll>Graph</ll> implementations after the item principle.
+     * Graph implementations have to implement this interface for there hidden edge inner class.
+     */
     interface Edge {
 
         /**
