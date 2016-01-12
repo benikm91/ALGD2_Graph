@@ -81,4 +81,13 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
         return graph.getVertexCount();
     }
 
+    @Override
+    public Iterable<? extends Edge> getEdges() {
+        return graph.getEdges();
+    }
+
+    @Override
+    public int degree(Vertex vertex) {
+        return graph.degree(vertex);
+    }
 }

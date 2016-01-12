@@ -1,8 +1,7 @@
 package com.hambbe.graph;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +24,12 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     @Override
     public Iterable<? extends Vertex> getVertexes() {
-        return this.vertexes;
+        return (Iterable<Vertex>)this.vertexes.clone();
+    }
+
+    @Override
+    public Iterable<? extends Edge> getEdges() {
+        return new EdgeIterable();
     }
 
     /**
@@ -34,7 +38,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      */
     protected void checkMembership(final Edge pEdge) {
         if (pEdge == null) throw new IllegalArgumentException("Null is not a member of this graph.");
-        if (!(pEdge instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
+        if (!(pEdge instanceof AbstractGraph.AbstractEdge)) throw new IllegalArgumentException("Supplied Vertex is not a AbstractEdge");
         final AbstractEdge edge = (AbstractEdge) pEdge;
         if (edge.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
 
@@ -104,6 +108,12 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     public List<Vertex> neighbors(final Vertex from) {
         checkMembership(from);
         return ((VertexImpl) from).edges.stream().map(e -> e.to).collect(Collectors.toList());
+    }
+
+    @Override
+    public int degree(Vertex vertex) {
+        checkMembership(vertex);
+        return ((VertexImpl) vertex).edges.size();
     }
 
     @Override
@@ -220,4 +230,66 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     }
 
+    class EdgeIterable implements Iterable<Edge> {
+
+        Iterator<VertexImpl> vertexIterator;
+        Iterator<AbstractEdge> edgesIterator;
+
+        EdgeIterable() {
+            this.vertexIterator = vertexes.iterator();
+            this.edgesIterator = vertexes.getFirst().edges.iterator();
+        }
+
+        @Override
+        public Iterator<Edge> iterator() {
+            return new EdgeIterator();
+        }
+
+        @Override
+        public void forEach(Consumer<? super Edge> action) {
+            Iterator<Edge> it = iterator();
+            while (it.hasNext()); {
+                action.accept(it.next());
+            }
+        }
+
+        @Override
+        public Spliterator<Edge> spliterator() {
+            throw new UnsupportedOperationException();
+        }
+
+        class EdgeIterator implements Iterator<Edge> {
+
+            @Override
+            public boolean hasNext() {
+                if (!edgesIterator.hasNext()) {
+                    if (vertexIterator.hasNext()) {
+                        VertexImpl v = vertexIterator.next();
+                        edgesIterator = v.edges.iterator();
+                        return hasNext();
+                    }
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public Edge next() {
+                if (!edgesIterator.hasNext()) {
+                    if (!vertexIterator.hasNext()) {
+                        throw new NoSuchElementException();
+                    }
+                    VertexImpl v = vertexIterator.next();
+                    edgesIterator = v.edges.iterator();
+                    return next();
+                }
+                return edgesIterator.next();
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
+    }
 }

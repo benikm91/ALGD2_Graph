@@ -83,10 +83,22 @@ public interface Graph<V, E> {
     void setValue(Vertex vertex, V newValue);
 
     /**
+     * Get degree of vertex
+     * @return The degree
+     */
+    int degree(Vertex vertex);
+
+    /**
      * Get all vertexes stored in this graph
-     * @return List of vertexes
+     * @return Iterable of vertexes
      */
     Iterable<? extends Vertex> getVertexes();
+
+    /**
+     * Get all edges stored in this graph
+     * @return Iterable of edges
+     */
+    Iterable<? extends Edge> getEdges();
 
     /***
      * Public Vertex for referencing vertexes in the AbstractGraph implementations after the ... principle.

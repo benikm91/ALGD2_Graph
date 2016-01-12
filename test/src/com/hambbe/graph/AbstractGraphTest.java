@@ -1,5 +1,6 @@
 package com.hambbe.graph;
 
+import com.hambbe.graph.data.TestData;
 import org.junit.Test;
 
 import java.util.List;
@@ -85,4 +86,11 @@ public class AbstractGraphTest {
         assertTrue(graph.getValue(value).equals("Value"));
     }
 
+    @Test
+    public void testGetEdges() {
+        IntGraph<String> graph = TestData.ABCintGraph(2);
+        for(Graph.Edge e : graph.getEdges()) {
+            System.out.println(graph.getEdgeValue(e));
+        }
+    }
 }
