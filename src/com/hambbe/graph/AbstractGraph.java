@@ -1,6 +1,11 @@
 package com.hambbe.graph;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -16,7 +21,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     protected final LinkedList<VertexImpl> vertexes = new LinkedList<>();
 
     @Override
-    public Vertex addVertex(V value) {
+    public Vertex addVertex(final V value) {
         VertexImpl v = new VertexImpl(value, this);
         vertexes.addLast(v);
         return v;
@@ -137,11 +142,17 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     protected abstract class AbstractEdge implements Edge {
-        public final AbstractGraph graph;
 
-        public final Vertex from;
-        public final Vertex to;
+        /** Graph this edge belongs to. */
+        protected final AbstractGraph graph;
 
+        /** Vertex where the edge points from. */
+        protected final Vertex from;
+
+        /** Vertex where the edge points to. */
+        protected final Vertex to;
+
+        @Override
         public abstract double getWeight();
 
         @Override
@@ -154,7 +165,12 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
             return this.from;
         }
 
-        protected AbstractEdge(Vertex from, Vertex to, AbstractGraph graph) {
+        /**
+         * @param from Field value.
+         * @param to Field value.
+         * @param graph Field value.
+         */
+        protected AbstractEdge(final Vertex from, final Vertex to, final AbstractGraph graph) {
             this.from = from;
             this.to = to;
             this.graph = graph;
@@ -168,29 +184,47 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     protected class VertexImpl implements Vertex, Comparator<VertexImpl> {
 
+        /** Graph this vertex belongs to. */
         protected final AbstractGraph graph;
+
+        /** Value of this vertex. */
         protected V value;
 
         /**
          * Helper variable for marking the vertex with extra info (like visited).
-         * Byte was chosen, so different info can be stored and it needs also 1 byte of storage (same as boolean).
+         * Byte was chosen, so a range of info can be stored.
+         * In Java boolean needs 1 byte storage anyways.
          */
         protected byte marked = 0;
 
-        /** adjacency list */
+        /** Edges outgoing form this vertex. */
         protected LinkedList<AbstractEdge> edges = new LinkedList<>();
 
+        /**
+         * @param value Field value.
+         * @param graph Field value.
+         */
         protected VertexImpl(V value, AbstractGraph graph) {
             this.value = value;
             this.graph = graph;
         }
 
+        /**
+         * Adds edge to edges.
+         * @param edge Edge pointing from this vertex to a vertex of this graph.
+         */
         protected void connect(AbstractEdge edge) {
+            assert edge.from == this;
             this.edges.addLast(edge);
         }
 
-        protected boolean disconnect(VertexImpl v) {
-            return edges.removeIf(e -> e.to == v);
+        /**
+         * Remove all edges which point to vertex.
+         * @param vertex .
+         * @return True, if something got deleted. False, otherwise.
+         */
+        protected boolean disconnect(VertexImpl vertex) {
+            return edges.removeIf(e -> e.to == vertex);
         }
 
         @Override
@@ -203,22 +237,38 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
             return v2.edges.size() - v1.edges.size();
         }
 
+        /**
+         * @return True, if vertex has been marked. False, otherwise.
+         */
         protected boolean isMarked() {
             return this.marked != 0;
         }
 
+        /**
+         * @return Specific mark value of this vertex.
+         */
         protected byte getMarkedValue() {
             return this.marked;
         }
 
+        /**
+         * Remove mark from vertex.
+         */
         protected void demark() {
             this.setMarked((byte) 0);
         }
 
+        /**
+         * Mark value with 1.
+         */
         protected void mark() {
             this.setMarked((byte) 1);
         }
 
+        /**
+         * Mark vertex with a value.
+         * @param marked Mark value.
+         */
         protected void setMarked(byte marked) {
             this.marked = marked;
         }
@@ -230,12 +280,30 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     }
 
+    /**
+     * Own Edge iterator implementation.
+     *
+     * <b>Idea</b>
+     * Behind the scenes iterate over all vertexes and for each vertex over his edges.
+     *
+     * <b>Note</b>
+     * To archive a iteration over all edges in O(e).
+     * If we would instead connect all vertex::edges together, we get O(v + e).
+     *
+     * Iterator.remove was not implemented. Remove edges via {@link #disconnect(Edge)}.
+     */
     class EdgeIterable implements Iterable<Edge> {
 
-        Iterator<VertexImpl> vertexIterator;
-        Iterator<AbstractEdge> edgesIterator;
+        /** Internal vertex iterator. */
+        private Iterator<VertexImpl> vertexIterator;
 
-        EdgeIterable() {
+        /** Internal edge iterator for current vertex. */
+        private Iterator<AbstractEdge> edgesIterator;
+
+        /**
+         * Inits vertexIterator and edgesIterator with first value.
+         */
+        private EdgeIterable() {
             this.vertexIterator = vertexes.iterator();
             this.edgesIterator = vertexes.getFirst().edges.iterator();
         }
@@ -246,9 +314,9 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
 
         @Override
-        public void forEach(Consumer<? super Edge> action) {
+        public void forEach(final Consumer<? super Edge> action) {
             Iterator<Edge> it = iterator();
-            while (it.hasNext()); {
+            while (it.hasNext()) {
                 action.accept(it.next());
             }
         }

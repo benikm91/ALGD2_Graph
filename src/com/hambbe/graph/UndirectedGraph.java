@@ -13,9 +13,10 @@ public class UndirectedGraph<V, E> extends GraphDecorator<V, E> {
     }
 
     @Override
-    public void connect(Vertex from, Vertex to, E weight) {
+    public Edge connect(Vertex from, Vertex to, E weight) {
         graph.connect(from, to, weight);
         graph.connect(to, from, weight);
+        return null;
     }
 
     @Override
