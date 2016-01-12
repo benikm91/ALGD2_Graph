@@ -6,8 +6,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test {@link AbstractGraph} methods.
@@ -89,8 +88,41 @@ public class AbstractGraphTest {
     @Test
     public void testGetEdges() {
         IntGraph<String> graph = TestData.ABCintGraph(2);
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        int count1 = 0;
         for(Graph.Edge e : graph.getEdges()) {
-            System.out.println(graph.getEdgeValue(e));
+            sb1.append(e);
+            count1++;
         }
+        int count2 = 0;
+        for (Graph.Vertex v : graph.getVertexes()) {
+            for (Graph.Edge e : v.getEdges()) {
+                sb2.append(e);
+                count2++;
+            }
+        }
+        char[] chars1 = sb1.toString().toCharArray();
+        char[] chars2 = sb2.toString().toCharArray();
+        int hash1 = 0, hash2 = 0;
+        for (int i = 0; i < chars1.length; i++) {
+            hash1 = hash1 ^ ((int)chars1[i]*i);
+        }
+        for (int i = 0; i < chars2.length; i++) {
+            hash2 = hash2 ^ ((int)chars2[i]*i);
+        }
+        assertEquals("Unexpected amount of edges", count1, count2);
+        assertEquals("Unexpected order of edges", hash1, hash2);
+
+        Iterable<? extends Graph.Edge> edges = graph.getEdges();
+
+        count1 = 0; count2 = 0;
+        for (Graph.Edge e : edges) {
+            count1++;
+        }
+        for (Graph.Edge e : edges) {
+            count2++;
+        }
+        assertEquals("Iterating twice over the same List with different outcome!", count1, count2);
     }
 }

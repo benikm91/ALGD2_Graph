@@ -1,7 +1,6 @@
 package com.hambbe.graph;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -232,25 +231,9 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     class EdgeIterable implements Iterable<Edge> {
 
-        Iterator<VertexImpl> vertexIterator;
-        Iterator<AbstractEdge> edgesIterator;
-
-        EdgeIterable() {
-            this.vertexIterator = vertexes.iterator();
-            this.edgesIterator = vertexes.getFirst().edges.iterator();
-        }
-
         @Override
         public Iterator<Edge> iterator() {
             return new EdgeIterator();
-        }
-
-        @Override
-        public void forEach(Consumer<? super Edge> action) {
-            Iterator<Edge> it = iterator();
-            while (it.hasNext()); {
-                action.accept(it.next());
-            }
         }
 
         @Override
@@ -259,6 +242,15 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         }
 
         class EdgeIterator implements Iterator<Edge> {
+
+            Iterator<VertexImpl> vertexIterator;
+            Iterator<AbstractEdge> edgesIterator;
+
+            EdgeIterator() {
+                this.vertexIterator = vertexes.iterator();
+                VertexImpl v = vertexIterator.next();
+                this.edgesIterator = v.edges.iterator();
+            }
 
             @Override
             public boolean hasNext() {

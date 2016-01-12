@@ -3,8 +3,6 @@ package com.hambbe.graph.search;
 import com.hambbe.graph.DirectedGraph;
 import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graphs;
-import com.hambbe.graph.IntGraph;
-
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -49,11 +47,19 @@ public class BellmannFordTest extends TestCase {
 
         List<Graphs.Link> route = Graphs.bellmanFord(graph, H, K);
 
-        assertNotNull("No route found!", route);
+        assertNotNull(route);
 
         String res = graph.getValue(route.get(0).getFrom()).name + " " + route.stream().map(s -> graph.getValue(s.getTo()).name).reduce((s,a) -> s + " " + a).get();
 
-        assertEquals("Not expected result!", "Hambbe ist der wahre König", res);
+        assertEquals("Hambbe ist der wahre König", res);
+
+        graph.connect(K,D,-2);
+
+        assertNull(Graphs.bellmanFord(graph, H, K));
+
+        graph.disconnect(H,I);
+
+        assertNull(Graphs.bellmanFord(graph, H, I));
 
     }
 
