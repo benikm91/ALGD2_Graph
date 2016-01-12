@@ -72,7 +72,7 @@ public class Graphs {
      * @return Route to item, if exists. Null, otherwise.
      */
     public static <V, E> List<Link> bestFirstSearch(final Graph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
-        final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getCurrent()).value);
+        final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getFrom()).value);
         final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
         return graphSearch(graph, from, pq, to);
@@ -101,42 +101,44 @@ public class Graphs {
 
     /**
      *
-     * @param graph
-     * @param pFrom
-     * @param <V>
-     * @param <E>
+     * @param graph Graph to search in.
+     * @param pFrom Vertex to search from.
+     * @param <V> Type of vertex in graph
+     * @param <E> Type of edges in graph.
      * @return
      *  HashMap with all shortest paths from pFrom to all vertexes in the graph. Vertex is the key to get to the path.
      *  If a vertex is not reachable there is no path to it.
      */
-    public static <V, E> HashMap<Graph.Vertex, LinkedList<Link>> dijkstra(final Graph<V,E> graph, final Graph.Vertex pFrom) {
-        final HashMap<Graph.Vertex, Step> V = new HashMap<>();
+    public static <V, E> HashMap<Graph.Vertex, LinkedList<Link>> dijkstra(final Graph<V, E> graph, final Graph.Vertex pFrom) {
+        final HashMap<Graph.Vertex, Step> shortestPaths = new HashMap<>();
         final PriorityQueue<Step> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
 
         final Step init = new Step(null, null, 0);
-        V.put(pFrom, init);
+        shortestPaths.put(pFrom, init);
 
         // add neighbours from pFrom
         pFrom.getEdges().forEach(e -> pq.add(new Step(init, e, e.getWeight())));
 
+        // Search all shortest paths and store them into V.
         while (!pq.isEmpty()) {
             // Get best candidate for search.
             final Step currentStep = pq.poll();
-            final Graph.Vertex next = currentStep.edge.getTo();
-            Step oldStep = V.get(next);
+            final Graph.Vertex currentStepTo = currentStep.edge.getTo();
+            Step oldStep = shortestPaths.get(currentStepTo);
             if (oldStep == null || currentStep.totalCost < oldStep.totalCost) {
                 // override oldStep with currentStep.
-                V.put(next, currentStep);
+                shortestPaths.put(currentStepTo, currentStep);
                 // add children of currentStep to PriorityQueue.
-                next.getEdges().forEach(e -> pq.add(new Step(currentStep, e, e.getWeight())));
+                currentStepTo.getEdges().forEach(e -> pq.add(new Step(currentStep, e, e.getWeight())));
             }
         }
 
+        // Prepare result.
         HashMap<Graph.Vertex, LinkedList<Link>> result = new HashMap<>();
         graph.getVertexes().forEach(vertex -> {
             // Build route between start and vertex
             LinkedList<Link> route = new LinkedList<>();
-            for (Step step = V.get(vertex); step.prev != null; step = step.prev) {
+            for (Step step = shortestPaths.get(vertex); step.prev != null; step = step.prev) {
                 route.addFirst(new Link(step.edge, step.totalCost));
             }
             result.put(vertex, route);
@@ -166,7 +168,7 @@ public class Graphs {
     public static <V, E> List<Link> aStar(final Graph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
         final Function<Step, Double> assumedTotalCost = (p) ->
                 p.totalCost
-                + ((p.getCurrent() == null) ? 0 : heuristic.apply(graph.getValue(p.getCurrent())));
+                + ((p.getFrom() == null) ? 0 : heuristic.apply(graph.getValue(p.getFrom())));
         final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
         return graphSearch(graph, from, pq, to);
@@ -190,7 +192,7 @@ public class Graphs {
      * @return Route to item, if exists and there was no cycle with negative edges on the way. Null, otherwise.
      */
     public static <V, E> List<Link> bellmanFord(final Graph<V, E> graph, final Graph.Vertex pFrom, final Graph.Vertex pTo) {
-        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
+        HashMap<Graph.Vertex, Step> V = bellmanFordSearch(graph, pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
         if (V == null) {
@@ -204,7 +206,7 @@ public class Graphs {
 
         // Build route between start and goal item
         LinkedList<Link> route = new LinkedList<>();
-        for (BellmanFordNode curr = V.get(pTo); curr.from != null; curr = curr.from) {
+        for (Step curr = V.get(pTo); curr.prev != null; curr = curr.prev) {
             route.addFirst(new Link(curr.edge, curr.totalCost));
         }
         return route;
@@ -225,7 +227,7 @@ public class Graphs {
      * @return List routes to all reachable items, if there was no cycle with negative edges on the way. Null, otherwise.
      */
     public static <V, K> List<List<Link>> bellmanFord(final Graph<V, K> graph, final Graph.Vertex pFrom) {
-        HashMap<Graph.Vertex, BellmanFordNode> V = bellmanFordSearch(graph, pFrom);
+        HashMap<Graph.Vertex, Step> V = bellmanFordSearch(graph, pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
         if (V == null) {
@@ -242,7 +244,7 @@ public class Graphs {
 
             // Build route between start and goal item
             LinkedList<Link> route = new LinkedList<>();
-            for (BellmanFordNode curr = V.get(vertex); curr.from != null; curr = curr.from) {
+            for (Step curr = V.get(vertex); curr.prev != null; curr = curr.prev) {
                 route.addFirst(new Link(curr.edge, curr.totalCost));
             }
             routes.add(route);
@@ -258,17 +260,17 @@ public class Graphs {
      * @param <E> Generic edge type
      * @return HashMap with all shortest paths from pFrom to all vertexes in the graph. Vertex is the key to get to the path.
      */
-    private static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
-        HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
-        graph.getVertexes().forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (pFrom == v) ? 0 : Double.MAX_VALUE)));
+    private static <V, E> HashMap<Graph.Vertex, Step> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
+        HashMap<Graph.Vertex, Step> V = new HashMap<>();
+        graph.getVertexes().forEach(v -> V.put(v, new Step(null, null, (pFrom == v) ? 0 : Double.MAX_VALUE)));
 
         for (int i = 0; i < graph.getVertexCount() - 1; i++) {
             for (Graph.Vertex vertex : graph.getVertexes()) {
                 for (Graph.Edge e : vertex.getEdges()) {
-                    BellmanFordNode u = V.get(vertex);
-                    BellmanFordNode v = V.get(e.getTo());
+                    Step u = V.get(vertex);
+                    Step v = V.get(e.getTo());
                     if (u.totalCost + e.getWeight() < v.totalCost) {
-                        V.put(e.getTo(), new BellmanFordNode(e.getTo(), u, e, u.totalCost + e.getWeight()));
+                        V.put(e.getTo(), new Step(u, e, e.getWeight()));
                     }
                 }
             }
@@ -276,41 +278,14 @@ public class Graphs {
 
         for (Graph.Vertex vertex : graph.getVertexes()) {
             for (Graph.Edge e : vertex.getEdges()) {
-                BellmanFordNode u = V.get(vertex);
-                BellmanFordNode v = V.get(e.getTo());
+                Step u = V.get(vertex);
+                Step v = V.get(e.getTo());
                 if (u.totalCost + e.getWeight() < v.totalCost) {
                     return null;
                 }
             }
         }
         return V;
-    }
-
-    /**
-     * Internal node helping for bellman ford algorithm.
-     */
-    protected static class BellmanFordNode {
-        /** Current vertex.. */
-        private final Graph.Vertex value;
-        /** Node i came from. */
-        private final BellmanFordNode from;
-        /** Edge i used to get here. */
-        private final Graph.Edge edge;
-        /** Total cost till now. */
-        private final double totalCost;
-
-        /**
-         * @param value Field value.
-         * @param from Field value.
-         * @param edge Field value.
-         * @param totalCost Field value.
-         */
-        public BellmanFordNode(final Graph.Vertex value, final BellmanFordNode from, final Graph.Edge edge, final double totalCost) {
-            this.value = value;
-            this.from = from;
-            this.edge = edge;
-            this.totalCost = totalCost;
-        }
     }
 
     /**
@@ -397,11 +372,11 @@ public class Graphs {
             this.totalCost = ((prev == null) ? 0 : prev.totalCost) + cost;
         }
 
-        public Graph.Vertex getCurrent() {
-            return (prev == null) ? null : prev.getGoal();
+        public Graph.Vertex getFrom() {
+            return (edge == null) ? null : edge.getFrom();
         }
 
-        public Graph.Vertex getGoal() {
+        public Graph.Vertex getTo() {
             return (edge == null) ? null : edge.getTo();
         }
     }

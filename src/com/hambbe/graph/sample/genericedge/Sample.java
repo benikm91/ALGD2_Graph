@@ -6,6 +6,8 @@ import com.hambbe.graph.Graphs;
 import com.hambbe.graph.Graphs.Link;
 import com.hambbe.graph.UndirectedGraph;
 
+import java.util.List;
+
 /**
  * Created by Benjamin on 12.01.2016.
  */
@@ -56,14 +58,32 @@ public class Sample {
             System.out.println(++i + ") " + graph.getValue(link.getFrom()) + "--" + edge.toString() + "-->" + graph.getValue(link.getTo()));
         }
 
+        System.out.println("---");
+
+        System.out.println("Find shortest routes to all other cities from " + graph.getValue(from) + " (dijkstra)");
         // Find & print all costs from from to all other vertexes.
         Graphs.dijkstra(graph, from).values().forEach(
-            route -> {
-                if (!route.isEmpty()) {
-                    Link last = route.getLast();
-                    System.out.println(graph.getValue(last.getTo()) + ": " + last.getTotalCost());
+                route -> {
+                    if (!route.isEmpty()) {
+                        Link last = route.getLast();
+                        System.out.println(graph.getValue(last.getTo()) + ": " + last.getTotalCost());
+                    }
                 }
-            }
+        );
+
+        System.out.println("---");
+
+        System.out.println("Find shortest routes to all other cities from " + graph.getValue(from) + " (bellmanFord)");
+        // Find & print all costs from from to all other vertexes.
+        List<List<Link>> res = Graphs.bellmanFord(graph, from);
+        if (res == null) System.out.println("bellman returned null");
+        else res.forEach(
+                route -> {
+                    if (!route.isEmpty()) {
+                        Link last = route.get(route.size() - 1); // small enough sample so O(n^2) does not matter :)
+                        System.out.println(graph.getValue(last.getTo()) + ": " + last.getTotalCost());
+                    }
+                }
         );
     }
 
