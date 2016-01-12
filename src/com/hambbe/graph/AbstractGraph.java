@@ -138,8 +138,8 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     protected abstract class AbstractEdge implements Edge {
 
-        public final Vertex from;
-        public final Vertex to;
+        /** Graph this edge belongs to. */
+        protected final AbstractGraph graph;
 
         /** Vertex where the edge points from. */
         protected final Vertex from;
