@@ -1,7 +1,15 @@
 package com.hambbe.graph.sample;
 
-public interface Transport {
+public abstract class Transport {
 
-    int getCost();
+    private int cost;
+
+    public Transport(int cost) {
+        this.cost = cost;
+    }
+
+    public int getCost() {
+        return this.cost;
+    }
 
 }

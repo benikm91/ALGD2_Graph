@@ -9,6 +9,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
+        // Setting up vertexes
         IntGraph<String> graph = new IntGraph<>();
         Graph.Vertex basel = graph.addVertex("Basel");
         Graph.Vertex berlin = graph.addVertex("Berlin");
@@ -18,6 +19,7 @@ public class Main {
         Graph.Vertex tokyo = graph.addVertex("Tokyo");
         Graph.Vertex newyork = graph.addVertex("New York");
 
+        // Setting up connections.
         graph.connect(tokyo, berlin, 100);
         graph.connect(jerusalem, tokyo, 50);
         graph.connect(newyork, tokyo, 100);
@@ -31,14 +33,13 @@ public class Main {
         graph.connect(newyork, berlin, 40);
         graph.connect(berlin, newyork, 45);
 
+        // look for a connection
         List<Graphs.Link> route = Graphs.dijkstra(graph, basel, tokyo);
-        System.out.print(graph.getValue(basel));
-        double lastCost = 0;
+        System.out.println("Find path from " + graph.getValue(basel) + " to " + graph.getValue(tokyo));
+        int i = 0;
         for (Graphs.Link s : route) {
-            System.out.print(" -" + (s.getTotalCost() - lastCost) + "-> " + graph.getValue(s.getTo()));
-            lastCost = s.getTotalCost();
+            System.out.println(++i + ") " + graph.getValue(s.getFrom()) + " --" + (s.getCost()) + "--> " + graph.getValue(s.getTo()));
         }
-        System.out.print(" ( = " + lastCost + " )" );
 
     }
 

@@ -8,7 +8,7 @@ public class UndirectedGraph<V, E> extends GraphDecorator<V, E> {
         super(new DirectedGraph<>(f));
     }
 
-    public UndirectedGraph(Graph<V, E> graph) {
+    public UndirectedGraph(AbstractGraph<V, E> graph) {
         super(graph);
     }
 
@@ -25,4 +25,8 @@ public class UndirectedGraph<V, E> extends GraphDecorator<V, E> {
                && graph.disconnect(to, from);
     }
 
+    @Override
+    public Iterable<? extends Edge> getEdges() {
+        throw new UnsupportedOperationException("Not implemented!");
+    }
 }
