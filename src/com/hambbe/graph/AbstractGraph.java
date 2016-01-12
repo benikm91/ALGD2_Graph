@@ -290,11 +290,6 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
             return new EdgeIterator();
         }
 
-        @Override
-        public Spliterator<Edge> spliterator() {
-            throw new UnsupportedOperationException();
-        }
-
         class EdgeIterator implements Iterator<Edge> {
 
             Iterator<VertexImpl> vertexIterator;
