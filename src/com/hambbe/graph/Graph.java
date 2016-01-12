@@ -127,6 +127,27 @@ public interface Graph<V, E> {
          */
         Iterable<? extends Edge> getEdges();
 
+        /**
+         * @return True, if vertex has been marked. False, otherwise.
+         */
+        boolean isMarked();
+
+        /**
+         * @return Specific mark value of this vertex.
+         */
+        byte getMarkedValue();
+
+        /**
+         * Remove mark from vertex.
+         */
+        void demark();
+
+        /**
+         * Mark value with 1.
+         */
+        void mark();
+
+
     }
 
     /***

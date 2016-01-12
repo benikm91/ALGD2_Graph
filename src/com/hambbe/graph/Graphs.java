@@ -26,7 +26,7 @@ public class Graphs {
      * @param <E> Value type of edge in graph.
      * @return Route of vertexes, if exists. Empty, if to == from. Null, otherwise.
      */
-    protected static <V, E> List<Link> graphSearch(final AbstractGraph<V, E> graph, final Graph.Vertex pFrom, final PriorityQueue<Step> pq, final Graph.Vertex pTo) {
+    protected static <V, E> List<Link> graphSearch(final Graph<V, E> graph, final Graph.Vertex pFrom, final PriorityQueue<Step> pq, final Graph.Vertex pTo) {
         final AbstractGraph<V, E>.VertexImpl from = (AbstractGraph<V, E>.VertexImpl) pFrom;
         final AbstractGraph<V, E>.VertexImpl to = (AbstractGraph<V, E>.VertexImpl) pTo;
         if (from == to) return new LinkedList<>(); // nothing must be do, to reach to.
@@ -47,7 +47,7 @@ public class Graphs {
             }
         }
         // Clean up - Delete marking on vertexes.
-        graph.vertexes.forEach(AbstractGraph.VertexImpl::demark);
+        graph.getVertexes().forEach(Graph.Vertex::demark);
         if (result == null) return null; // Nothing found.
 
         // Build route between start and to item
@@ -71,8 +71,7 @@ public class Graphs {
      * @param heuristic Heuristic function for prioritizing items.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, E> List<Link> bestFirstSearch(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
-        graph.checkMembership(from, to);
+    public static <V, E> List<Link> bestFirstSearch(final Graph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
         final Function<Step, Double> greedy = (p) -> heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getCurrent()).value);
         final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(greedy.apply(p1), greedy.apply(p2)));
@@ -95,8 +94,7 @@ public class Graphs {
      * @param to Goal item.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, E> List<Link> dijkstra(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to) {
-        graph.checkMembership(from, to);
+    public static <V, E> List<Link> dijkstra(final Graph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to) {
         final PriorityQueue<Step> pq = new PriorityQueue<>((p1, p2) -> Double.compare(p1.totalCost, p2.totalCost));
         return graphSearch(graph, from, pq, to);
     }
@@ -120,11 +118,10 @@ public class Graphs {
      * @param heuristic Heuristic function for helping to prioritize items.
      * @return Route to item, if exists. Null, otherwise.
      */
-    public static <V, E> List<Link> aStar(final AbstractGraph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
-        graph.checkMembership(from, to);
+    public static <V, E> List<Link> aStar(final Graph<V, E> graph, final Graph.Vertex from, final Graph.Vertex to, final Function<V, Double> heuristic) {
         final Function<Step, Double> assumedTotalCost = (p) ->
                 p.totalCost
-                + ((p.getCurrent() == null) ? 0 : heuristic.apply(((AbstractGraph<V, E>.VertexImpl) p.getCurrent()).value));
+                + ((p.getCurrent() == null) ? 0 : heuristic.apply(graph.getValue(p.getCurrent())));
         final PriorityQueue<Step> pq = new PriorityQueue<>(
                 (p1, p2) -> Double.compare(assumedTotalCost.apply(p1), assumedTotalCost.apply(p2)));
         return graphSearch(graph, from, pq, to);
@@ -216,7 +213,7 @@ public class Graphs {
      * @param <E> Generic edge type
      * @return HashMap with all shortest paths from pFrom to all vertexes in the graph. Vertex is the key to get to the path.
      */
-    protected static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
+    private static <V, E> HashMap<Graph.Vertex, BellmanFordNode> bellmanFordSearch(final Graph<V, E> graph, final Graph.Vertex pFrom) {
         HashMap<Graph.Vertex, BellmanFordNode> V = new HashMap<>();
         graph.getVertexes().forEach(v -> V.put(v, new BellmanFordNode(null, null, null, (pFrom == v) ? 0 : Double.MAX_VALUE)));
 

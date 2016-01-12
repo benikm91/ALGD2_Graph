@@ -55,17 +55,17 @@ public abstract class GraphDecorator<V, E> implements Graph<V, E> {
 
     @Override
     public void removeVertex(Vertex vertex) {
-        removeVertex(vertex);
+        graph.removeVertex(vertex);
     }
 
     @Override
     public V getValue(Vertex vertex) {
-        return getValue(vertex);
+        return graph.getValue(vertex);
     }
 
     @Override
     public void setValue(Vertex vertex, V newValue) {
-        setValue(vertex, newValue);
+        graph.setValue(vertex, newValue);
     }
 
     @Override

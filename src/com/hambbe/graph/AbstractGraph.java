@@ -1,7 +1,11 @@
 package com.hambbe.graph;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
 import java.util.stream.Collectors;
 
 /**
@@ -232,31 +236,23 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
             return v2.edges.size() - v1.edges.size();
         }
 
-        /**
-         * @return True, if vertex has been marked. False, otherwise.
-         */
-        protected boolean isMarked() {
+        @Override
+        public boolean isMarked() {
             return this.marked != 0;
         }
 
-        /**
-         * @return Specific mark value of this vertex.
-         */
-        protected byte getMarkedValue() {
+        @Override
+        public byte getMarkedValue() {
             return this.marked;
         }
 
-        /**
-         * Remove mark from vertex.
-         */
-        protected void demark() {
+        @Override
+        public void demark() {
             this.setMarked((byte) 0);
         }
 
-        /**
-         * Mark value with 1.
-         */
-        protected void mark() {
+        @Override
+        public void mark() {
             this.setMarked((byte) 1);
         }
 
