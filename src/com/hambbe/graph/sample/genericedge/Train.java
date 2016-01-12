@@ -1,4 +1,4 @@
-package com.hambbe.graph.sample;
+package com.hambbe.graph.sample.genericedge;
 
 /**
  * Created by Benjamin on 23.12.2015.

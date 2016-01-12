@@ -1,4 +1,4 @@
-package com.hambbe.graph.sample;
+package com.hambbe.graph.sample.genericedge;
 
 import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graph.Vertex;
@@ -45,17 +45,26 @@ public class Sample {
         // rome
         // tokyo
 
-        Vertex from = jeru;
-        Vertex to = newYork;
+        // Find & print fastest path from from to to.
+        final Vertex from = jeru;
+        final Vertex to = newYork;
         System.out.println("Note: Costs have switching cost added in Train and Airport class.");
         System.out.println("How to get from " + graph.getValue(from) + " to " + graph.getValue(to) + ": ");
         int i = 0;
-        for (Link link : Graphs.<String, Transport>bellmanFord(graph, from, to)) {
+        for (Link link : Graphs.bellmanFord(graph, from, to)) {
             Transport edge = graph.getEdgeValue(link.getEdge());
             System.out.println(++i + ") " + graph.getValue(link.getFrom()) + "--" + edge.toString() + "-->" + graph.getValue(link.getTo()));
         }
 
-
+        // Find & print all costs from from to all other vertexes.
+        Graphs.dijkstra(graph, from).values().forEach(
+            route -> {
+                if (!route.isEmpty()) {
+                    Link last = route.getLast();
+                    System.out.println(graph.getValue(last.getTo()) + ": " + last.getTotalCost());
+                }
+            }
+        );
     }
 
 }

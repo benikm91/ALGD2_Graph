@@ -1,4 +1,4 @@
-package com.hambbe.graph.sample;
+package com.hambbe.graph.sample.genericedge;
 
 public abstract class Transport {
 
