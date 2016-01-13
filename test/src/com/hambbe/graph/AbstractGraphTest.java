@@ -88,38 +88,22 @@ public class AbstractGraphTest {
     @Test
     public void testGetEdges() {
         IntGraph<String> graph = TestData.ABCintGraph(2);
+
         StringBuilder expectedSb = new StringBuilder();
         int expectedCount = 0;
         for(Graph.Edge e : graph.getEdges()) {
             expectedSb.append(e);
             expectedCount++;
         }
-        /*char[] chars1 = sb1.toString().toCharArray();
-        int hash1 = 0;
-        for (int i = 0; i < chars1.length; i++) {
-            hash1 = hash1 ^ ((int)chars1[i]*i);
-        }*/
 
         StringBuilder sb = new StringBuilder();
-        int count = 0, hash = 0;
-
+        int count = 0;
         for (Graph.Vertex v : graph.getVertexes()) {
             for (Graph.Edge e : v.getEdges()) {
                 sb.append(e);
                 count++;
             }
         }
-
-        /*char[] chars2 = sb.toString().toCharArray();
-        for (int i = 0; i < chars2.length; i++) {
-            hash = hash ^ ((int)chars2[i]*i);
-        }*/
-
-        /*assertEquals("Unexpected amount of edges", count1, count);
-        assertEquals("Unexpected order of edges", hash1, hash + 1);*/
-
-        /*assertEquals("Unexpected amount of edges", 676, count);
-        assertEquals("Unexpected order of edges", 3786346, hash);*/
 
         assertEquals("Unexpected amount of edges", expectedCount, count);
         assertEquals("Unexpected order of edges", expectedSb.toString(), sb.toString());
