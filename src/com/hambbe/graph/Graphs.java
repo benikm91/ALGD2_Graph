@@ -226,7 +226,7 @@ public class Graphs {
      * @param <K> Generic edge type
      * @return List routes to all reachable items, if there was no cycle with negative edges on the way. Null, otherwise.
      */
-    public static <V, K> List<List<Link>> bellmanFord(final Graph<V, K> graph, final Graph.Vertex pFrom) {
+    public static <V, K> HashMap<Graph.Vertex, LinkedList<Link>> bellmanFord(final Graph<V, K> graph, final Graph.Vertex pFrom) {
         HashMap<Graph.Vertex, Step> V = bellmanFordSearch(graph, pFrom);
 
         // Return null if the bellman-ford algorithm wasn't successful
@@ -234,7 +234,7 @@ public class Graphs {
             return null;
         }
 
-        List<List<Link>> routes = new LinkedList<>();
+        HashMap<Graph.Vertex, LinkedList<Link>> routes = new HashMap<>();
 
         for (Graph.Vertex vertex : graph.getVertexes()) {
             // Skip if the goal is unreachable from the given start item
@@ -247,7 +247,7 @@ public class Graphs {
             for (Step curr = V.get(vertex); curr.prev != null; curr = curr.prev) {
                 route.addFirst(new Link(curr.edge, curr.totalCost));
             }
-            routes.add(route);
+            routes.put(vertex, route);
         }
 
         return routes;

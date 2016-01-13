@@ -5,10 +5,7 @@ import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graphs;
 import junit.framework.TestCase;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class BellmannFordTest extends TestCase {
 
@@ -87,28 +84,22 @@ public class BellmannFordTest extends TestCase {
         graph.connect(I,E,1);
         graph.connect(E,K,1);
 
-        List<List<Graphs.Link>> routes = Graphs.bellmanFord(graph, H);
+        HashMap<Graph.Vertex, LinkedList<Graphs.Link>> routes = Graphs.bellmanFord(graph, H);
 
         assertNotNull(routes);
 
-        HashMap<Test, Double> totalValue = new HashMap<>();
-        HashMap<Test, Double> expectedTotalValue = new HashMap<>();
-        expectedTotalValue.put(graph.getValue(I), 1.0);
-        expectedTotalValue.put(graph.getValue(J), 1.0);
-        expectedTotalValue.put(graph.getValue(K), -1.0);
-        expectedTotalValue.put(graph.getValue(E), 2.0);
-        expectedTotalValue.put(graph.getValue(D), 6.0);
-        expectedTotalValue.put(graph.getValue(W), 9.0);
+        HashMap<Graph.Vertex, Double> expectedTotalValue = new HashMap<>();
+        expectedTotalValue.put(I, 1.0);
+        expectedTotalValue.put(J, 1.0);
+        expectedTotalValue.put(K, -1.0);
+        expectedTotalValue.put(E, 2.0);
+        expectedTotalValue.put(D, 6.0);
+        expectedTotalValue.put(W, 9.0);
 
-        for (List<Graphs.Link> route : routes) {
-            Graphs.Link current = ((LinkedList<Graphs.Link>)route).getLast();
-            totalValue.put(graph.getValue(current.getTo()), current.getTotalCost());
-        }
-
-        Iterator it = totalValue.entrySet().iterator();
+        Iterator<Map.Entry<Graph.Vertex, LinkedList<Graphs.Link>>> it = routes.entrySet().iterator();
         while (it.hasNext()) {
-            HashMap.Entry pair = (HashMap.Entry)it.next();
-            assertTrue(Math.abs(totalValue.get(pair.getKey()) - expectedTotalValue.get(pair.getKey())) < 0.0000000001);
+            HashMap.Entry<Graph.Vertex, LinkedList<Graphs.Link>> pair = it.next();  /*(HashMap.Entry)*/
+            assertTrue(Math.abs(pair.getValue().getLast().getTotalCost() - expectedTotalValue.get(pair.getKey())) < 0.0000000001);
         }
     }
 
