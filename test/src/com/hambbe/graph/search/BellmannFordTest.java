@@ -1,11 +1,16 @@
 package com.hambbe.graph.search;
 
 import com.hambbe.graph.DirectedGraph;
-import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graphs;
+import com.hambbe.graph.Vertex;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class BellmannFordTest extends TestCase {
 
@@ -28,13 +33,13 @@ public class BellmannFordTest extends TestCase {
     public void testBellmanFord() throws Exception {
         DirectedGraph<Test, Integer> graph = new DirectedGraph<>(e -> e.doubleValue());
 
-        Graph.Vertex H = graph.addVertex(new Test(12, "Hambbe"));
-        Graph.Vertex I = graph.addVertex(new Test(786, "ist"));
-        Graph.Vertex J = graph.addVertex(new Test(34, "Jaja"));
-        Graph.Vertex D = graph.addVertex(new Test(56, "der"));
-        Graph.Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
-        Graph.Vertex W = graph.addVertex(new Test(45, "wahre"));
-        Graph.Vertex K = graph.addVertex(new Test(42, "König"));
+        Vertex H = graph.addVertex(new Test(12, "Hambbe"));
+        Vertex I = graph.addVertex(new Test(786, "ist"));
+        Vertex J = graph.addVertex(new Test(34, "Jaja"));
+        Vertex D = graph.addVertex(new Test(56, "der"));
+        Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
+        Vertex W = graph.addVertex(new Test(45, "wahre"));
+        Vertex K = graph.addVertex(new Test(42, "König"));
 
         graph.connect(H,I,1);
         graph.connect(I,D,5);
@@ -67,13 +72,13 @@ public class BellmannFordTest extends TestCase {
     public void testBellmanFord1() throws Exception {
         DirectedGraph<Test, Integer> graph = new DirectedGraph<>(e -> e.doubleValue());
 
-        Graph.Vertex H = graph.addVertex(new Test(12, "Hambbe"));
-        Graph.Vertex I = graph.addVertex(new Test(786, "ist"));
-        Graph.Vertex J = graph.addVertex(new Test(34, "Jaja"));
-        Graph.Vertex D = graph.addVertex(new Test(56, "der"));
-        Graph.Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
-        Graph.Vertex W = graph.addVertex(new Test(45, "wahre"));
-        Graph.Vertex K = graph.addVertex(new Test(42, "König"));
+        Vertex H = graph.addVertex(new Test(12, "Hambbe"));
+        Vertex I = graph.addVertex(new Test(786, "ist"));
+        Vertex J = graph.addVertex(new Test(34, "Jaja"));
+        Vertex D = graph.addVertex(new Test(56, "der"));
+        Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
+        Vertex W = graph.addVertex(new Test(45, "wahre"));
+        Vertex K = graph.addVertex(new Test(42, "König"));
 
         graph.connect(H,I,1);
         graph.connect(I,D,5);
@@ -84,11 +89,11 @@ public class BellmannFordTest extends TestCase {
         graph.connect(I,E,1);
         graph.connect(E,K,1);
 
-        HashMap<Graph.Vertex, LinkedList<Graphs.Link>> routes = Graphs.bellmanFord(graph, H);
+        HashMap<Vertex, LinkedList<Graphs.Link>> routes = Graphs.bellmanFord(graph, H);
 
         assertNotNull(routes);
 
-        HashMap<Graph.Vertex, Double> expectedTotalValue = new HashMap<>();
+        HashMap<Vertex, Double> expectedTotalValue = new HashMap<>();
         expectedTotalValue.put(I, 1.0);
         expectedTotalValue.put(J, 1.0);
         expectedTotalValue.put(K, -1.0);
@@ -96,9 +101,9 @@ public class BellmannFordTest extends TestCase {
         expectedTotalValue.put(D, 6.0);
         expectedTotalValue.put(W, 9.0);
 
-        Iterator<Map.Entry<Graph.Vertex, LinkedList<Graphs.Link>>> it = routes.entrySet().iterator();
+        Iterator<Map.Entry<Vertex, LinkedList<Graphs.Link>>> it = routes.entrySet().iterator();
         while (it.hasNext()) {
-            HashMap.Entry<Graph.Vertex, LinkedList<Graphs.Link>> pair = it.next();  /*(HashMap.Entry)*/
+            HashMap.Entry<Vertex, LinkedList<Graphs.Link>> pair = it.next();  /*(HashMap.Entry)*/
             assertTrue(Math.abs(pair.getValue().getLast().getTotalCost() - expectedTotalValue.get(pair.getKey())) < 0.0000000001);
         }
     }

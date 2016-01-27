@@ -8,8 +8,8 @@ import java.util.List;
  * When implementing there have to be hidden inner vertex and edge classes.
  * For pointing to vertexes and edges from a graph implementation use following the interfaces:
  * <ul>
- * <li>{@link com.hambbe.graph.Graph.Edge}
- * <li>{@link com.hambbe.graph.Graph.Vertex}
+ * <li>{@link com.hambbe.graph.Edge}
+ * <li>{@link com.hambbe.graph.Vertex}
  * </ul>
  * @param <V> Type of value in vertex.
  * @param <E> Type for edges.
@@ -115,62 +115,5 @@ public interface Graph<V, E> {
      * @return Iterable of edges
      */
     Iterable<? extends Edge> getEdges();
-
-    /***
-     * Public vertex for referencing vertexes in a <ll>Graph</ll> implementations after the item principle.
-     * Graph implementations have to implement this interface for there hidden vertex inner class.
-     */
-    interface Vertex {
-
-        /**
-         * @return All edges of this vertex.
-         */
-        Iterable<? extends Edge> getEdges();
-
-        /**
-         * @return True, if vertex has been marked. False, otherwise.
-         */
-        boolean isMarked();
-
-        /**
-         * @return Specific mark value of this vertex.
-         */
-        byte getMarkedValue();
-
-        /**
-         * Remove mark from vertex.
-         */
-        void demark();
-
-        /**
-         * Mark value with 1.
-         */
-        void mark();
-
-
-    }
-
-    /***
-     * Public edge for referencing edges in a <ll>Graph</ll> implementations after the item principle.
-     * Graph implementations have to implement this interface for there hidden edge inner class.
-     */
-    interface Edge {
-
-        /**
-         * @return Graph vertex the edge points from.
-         */
-        Vertex getFrom();
-
-        /**
-         * @return Graph vertex the edge points to.
-         */
-        Vertex getTo();
-
-        /**
-         * @return Weight of the edge.
-         */
-        double getWeight();
-
-    }
 
 }

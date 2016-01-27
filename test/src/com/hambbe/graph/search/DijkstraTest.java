@@ -1,12 +1,18 @@
 package com.hambbe.graph.search;
 
 import com.hambbe.graph.DirectedGraph;
-import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graphs;
+import com.hambbe.graph.Vertex;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class DijkstraTest {
 
@@ -29,13 +35,13 @@ public class DijkstraTest {
     public void testDijkstra() throws Exception {
         DirectedGraph<Test, Integer> graph = new DirectedGraph<>(Integer::doubleValue);
 
-        Graph.Vertex H = graph.addVertex(new Test(12, "Hambbe"));
-        Graph.Vertex I = graph.addVertex(new Test(43, "ist"));
-        Graph.Vertex J = graph.addVertex(new Test(34, "Jaja"));
-        Graph.Vertex D = graph.addVertex(new Test(56, "der"));
-        Graph.Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
-        Graph.Vertex W = graph.addVertex(new Test(45, "wahre"));
-        Graph.Vertex K = graph.addVertex(new Test(42, "König"));
+        Vertex H = graph.addVertex(new Test(12, "Hambbe"));
+        Vertex I = graph.addVertex(new Test(43, "ist"));
+        Vertex J = graph.addVertex(new Test(34, "Jaja"));
+        Vertex D = graph.addVertex(new Test(56, "der"));
+        Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
+        Vertex W = graph.addVertex(new Test(45, "wahre"));
+        Vertex K = graph.addVertex(new Test(42, "König"));
 
         graph.connect(H,I,1);
         graph.connect(I,D,1);
@@ -59,13 +65,13 @@ public class DijkstraTest {
     public void testDijkstra1() throws Exception {
         DirectedGraph<Test, Integer> graph = new DirectedGraph<>(Integer::doubleValue);
 
-        Graph.Vertex H = graph.addVertex(new Test(12, "Hambbe"));
-        Graph.Vertex I = graph.addVertex(new Test(786, "ist"));
-        Graph.Vertex J = graph.addVertex(new Test(34, "Jaja"));
-        Graph.Vertex D = graph.addVertex(new Test(56, "der"));
-        Graph.Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
-        Graph.Vertex W = graph.addVertex(new Test(45, "wahre"));
-        Graph.Vertex K = graph.addVertex(new Test(42, "König"));
+        Vertex H = graph.addVertex(new Test(12, "Hambbe"));
+        Vertex I = graph.addVertex(new Test(786, "ist"));
+        Vertex J = graph.addVertex(new Test(34, "Jaja"));
+        Vertex D = graph.addVertex(new Test(56, "der"));
+        Vertex E = graph.addVertex(new Test(34, "Wie bitte?"));
+        Vertex W = graph.addVertex(new Test(45, "wahre"));
+        Vertex K = graph.addVertex(new Test(42, "König"));
 
         graph.connect(H,I,1);
         graph.connect(I,D,5);
@@ -76,11 +82,11 @@ public class DijkstraTest {
         graph.connect(I,E,1);
         graph.connect(E,K,1);
 
-        HashMap<Graph.Vertex, LinkedList<Graphs.Link>> routes = Graphs.dijkstra(graph, H);
+        HashMap<Vertex, LinkedList<Graphs.Link>> routes = Graphs.dijkstra(graph, H);
 
         assertNotNull(routes);
 
-        HashMap<Graph.Vertex, Double> expectedTotalValue = new HashMap<>();
+        HashMap<Vertex, Double> expectedTotalValue = new HashMap<>();
         expectedTotalValue.put(I, 1.0);
         expectedTotalValue.put(J, 1.0);
         expectedTotalValue.put(K, 3.0);
@@ -88,9 +94,9 @@ public class DijkstraTest {
         expectedTotalValue.put(D, 6.0);
         expectedTotalValue.put(W, 9.0);
 
-        Iterator<Map.Entry<Graph.Vertex, LinkedList<Graphs.Link>>> it = routes.entrySet().iterator();
+        Iterator<Map.Entry<Vertex, LinkedList<Graphs.Link>>> it = routes.entrySet().iterator();
         while (it.hasNext()) {
-            HashMap.Entry<Graph.Vertex, LinkedList<Graphs.Link>> pair = it.next();
+            HashMap.Entry<Vertex, LinkedList<Graphs.Link>> pair = it.next();
             if (pair.getKey() != H) {
                 assertTrue(Math.abs(pair.getValue().getLast().getTotalCost() - expectedTotalValue.get(pair.getKey())) < 0.0000000001);
             } else {

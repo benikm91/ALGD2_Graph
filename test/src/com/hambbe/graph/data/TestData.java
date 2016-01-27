@@ -1,18 +1,18 @@
 package com.hambbe.graph.data;
 
-import com.hambbe.graph.Graph;
 import com.hambbe.graph.IntGraph;
+import com.hambbe.graph.Vertex;
 
 import java.util.function.Function;
 
 public class TestData {
 
-    private static Graph.Vertex generateNext(IntGraph<String> graph, String current, int remaining) {
+    private static Vertex generateNext(IntGraph<String> graph, String current, int remaining) {
         if (remaining == -1) return null;
-        Graph.Vertex parent = null;
+        Vertex parent = null;
         if (!"".equals(current)) parent = graph.addVertex(current);
         for (char c = 'A'; c <= 'Z'; c++) {
-            Graph.Vertex child = generateNext(graph, current + c, remaining - 1);
+            Vertex child = generateNext(graph, current + c, remaining - 1);
             if (parent != null && child != null) {
                 graph.connect(parent, child, 1);
             }
@@ -21,7 +21,7 @@ public class TestData {
     }
 
     /**
-     * Get an ABC Graph.
+     * Get an ABC Graph
      *
      * ABC Graph has following connections:
      * wn -> wnm

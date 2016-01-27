@@ -1,8 +1,8 @@
 package com.hambbe.graph.sample.intgraph;
 
-import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graphs;
 import com.hambbe.graph.IntGraph;
+import com.hambbe.graph.Vertex;
 
 import java.util.List;
 
@@ -11,13 +11,13 @@ public class Main {
     public static void main(String[] args) {
         // Setting up vertexes
         IntGraph<String> graph = new IntGraph<>();
-        Graph.Vertex basel = graph.addVertex("Basel");
-        Graph.Vertex berlin = graph.addVertex("Berlin");
-        Graph.Vertex rome = graph.addVertex("Rome");
-        Graph.Vertex jerusalem = graph.addVertex("Jerusalem");
-        Graph.Vertex london = graph.addVertex("London");
-        Graph.Vertex tokyo = graph.addVertex("Tokyo");
-        Graph.Vertex newyork = graph.addVertex("New York");
+        Vertex basel = graph.addVertex("Basel");
+        Vertex berlin = graph.addVertex("Berlin");
+        Vertex rome = graph.addVertex("Rome");
+        Vertex jerusalem = graph.addVertex("Jerusalem");
+        Vertex london = graph.addVertex("London");
+        Vertex tokyo = graph.addVertex("Tokyo");
+        Vertex newyork = graph.addVertex("New York");
 
         // Setting up connections.
         graph.connect(tokyo, berlin, 100);

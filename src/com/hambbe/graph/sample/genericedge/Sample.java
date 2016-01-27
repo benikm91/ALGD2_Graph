@@ -1,10 +1,10 @@
 package com.hambbe.graph.sample.genericedge;
 
 import com.hambbe.graph.Graph;
-import com.hambbe.graph.Graph.Vertex;
 import com.hambbe.graph.Graphs;
 import com.hambbe.graph.Graphs.Link;
 import com.hambbe.graph.UndirectedGraph;
+import com.hambbe.graph.Vertex;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +15,13 @@ import java.util.LinkedList;
 public class Sample {
 
     public static void main(String[] args) {
+        /**
+         * Sample program with following steps:
+         * - createing and connection graph.
+         * - Finding shortest path of from and to with an algorithm of Graphs (feel free to change for testing).
+         * - Echo all shortest costs from dijkstra & bellmanFord (should be equal).
+         */
+        // Createing and connecting graph (Connections are alphabetic ordered).
         Graph<String, Transport> graph = new UndirectedGraph<String, Transport>(t -> (double) t.getCost());
         Vertex newYork = graph.addVertex("New York");
         Vertex berlin = graph.addVertex("Berlin");
@@ -25,7 +32,6 @@ public class Sample {
         Vertex jeru = graph.addVertex("Jerusalem");
         Vertex rome = graph.addVertex("Rome");
         Vertex braz = graph.addVertex("Brazilia");
-
         // basel
         graph.connect(basel, berlin, new Train(100));
         graph.connect(basel, paris, new Train(100));
@@ -61,8 +67,8 @@ public class Sample {
 
         System.out.println("---");
 
-        System.out.println("Find shortest routes to all other cities from " + graph.getValue(from) + " (dijkstra)");
         // Find & print all costs from from to all other vertexes.
+        System.out.println("Find shortest routes to all other cities from " + graph.getValue(from) + " (dijkstra)");
         Graphs.dijkstra(graph, from).values().forEach(
                 route -> {
                     if (!route.isEmpty()) {

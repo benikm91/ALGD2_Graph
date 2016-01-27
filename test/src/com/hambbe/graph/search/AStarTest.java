@@ -1,8 +1,8 @@
 package com.hambbe.graph.search;
 
-import com.hambbe.graph.Graph;
 import com.hambbe.graph.Graphs;
 import com.hambbe.graph.IntGraph;
+import com.hambbe.graph.Vertex;
 import com.hambbe.graph.data.TestData;
 
 import org.junit.Test;
@@ -23,9 +23,9 @@ public class AStarTest {
         final Function<String, Double> heuristic = TestData.ABCGraphOptimalHeuristic(toValue);
         IntGraph<String> graph = TestData.ABCintGraph(4);
         // get vertexes.
-        Graph.Vertex from = null;
-        Graph.Vertex to = null;
-        for (Graph.Vertex vertex : graph.getVertexes()) {
+        Vertex from = null;
+        Vertex to = null;
+        for (Vertex vertex : graph.getVertexes()) {
             if (graph.getValue(vertex).equals(fromValue))
                 from = vertex;
             if (graph.getValue(vertex).equals(toValue))
@@ -49,10 +49,10 @@ public class AStarTest {
         final Function<String, Double> heuristic = TestData.ABCGraphOptimalHeuristic(toValue);
         IntGraph<String> graph = TestData.ABCintGraph(4);
         // get vertexes.
-        Graph.Vertex from = null;
-        Graph.Vertex to = null;
-        Graph.Vertex ac = null;
-        for (Graph.Vertex vertex : graph.getVertexes()) {
+        Vertex from = null;
+        Vertex to = null;
+        Vertex ac = null;
+        for (Vertex vertex : graph.getVertexes()) {
             if (graph.getValue(vertex).equals(fromValue))
                 from = vertex;
             if (graph.getValue(vertex).equals(toValue))

@@ -11,7 +11,7 @@ import java.util.function.Function;
  * @param <V> Type for vertexes.
  * @param <E> Type for edges.
  */
-public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
+public class DirectedGraph<V, E> extends UnweightedGraph<V, E> {
 
     /** User defined function for getting weight of a generic edge. */
     protected final Function<E, Double> edgeToWeight;
@@ -28,7 +28,7 @@ public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
     public Edge connect(final Vertex pFrom, final Vertex pTo, final E edgeValue) {
         checkMembership(pFrom, pTo);
         final VertexImpl from = (VertexImpl) pFrom;
-        AbstractEdge e = new GenericEdge(edgeValue, from, (VertexImpl) pTo, this);
+        UnweightedEdge e = new GenericEdge(edgeValue, from, (VertexImpl) pTo, this);
         from.connect(e);
         return e;
     }
@@ -43,7 +43,7 @@ public class DirectedGraph<V, E> extends AbstractGraph<V, E> {
     /**
      * Edge with generic value.
      */
-    protected class GenericEdge extends AbstractEdge {
+    protected class GenericEdge extends UnweightedEdge {
 
         /** value of edge. */
         protected final E value;

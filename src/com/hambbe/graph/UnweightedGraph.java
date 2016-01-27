@@ -1,20 +1,17 @@
 package com.hambbe.graph;
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Spliterator;
 import java.util.stream.Collectors;
 
 /**
- * General abstract class for different Graph implementations in the hambbe.graph library.
+ * General implementation of a unweighted graph.
  *
  * @param <V> Type of value in vertex
  * @param <E> Type for edges.
  */
-public abstract class AbstractGraph<V, E> implements Graph<V, E> {
+public class UnweightedGraph<V, E> implements Graph<V, E> {
 
     /** Vertexes of the graph. */
     protected final LinkedList<VertexImpl> vertexes = new LinkedList<>();
@@ -33,7 +30,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     @Override
     public Iterable<? extends Edge> getEdges() {
-        return new EdgeIterable();
+        return vertexes.stream().flatMap(v -> v.edges.stream()).collect(Collectors.toList());
     }
 
     /**
@@ -42,10 +39,9 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      */
     protected void checkMembership(final Edge pEdge) {
         if (pEdge == null) throw new IllegalArgumentException("Null is not a member of this graph.");
-        if (!(pEdge instanceof AbstractGraph.AbstractEdge)) throw new IllegalArgumentException("Supplied Vertex is not a AbstractEdge");
-        final AbstractEdge edge = (AbstractEdge) pEdge;
-        if (edge.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
-
+        if (!(pEdge instanceof UnweightedGraph.UnweightedEdge)) throw new IllegalArgumentException("Supplied Edge is not a UnweightedEdge");
+        final UnweightedEdge edge = (UnweightedEdge) pEdge;
+        if (edge.graph != this) throw new IllegalArgumentException("Supplied Edge not part of DirectedGraph");
     }
 
     /**
@@ -54,7 +50,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      */
     protected void checkMembership(final Vertex pVertex) {
         if (pVertex == null) throw new IllegalArgumentException("Null is not a member of this graph.");
-        if (!(pVertex instanceof AbstractGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
+        if (!(pVertex instanceof UnweightedGraph.VertexImpl)) throw new IllegalArgumentException("Supplied Vertex is not a VertexImpl");
         final VertexImpl vertex = (VertexImpl) pVertex;
         if (vertex.graph != this) throw new IllegalArgumentException("Supplied VertexImpl not part of DirectedGraph");
     }
@@ -63,7 +59,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * Calls {@link #checkMembership(Edge)} for all edges.
      * @param edges Edges to check.
      */
-    protected void checkMembership(final Edge... edges) {
+    protected final void checkMembership(final Edge... edges) {
         for (Edge edge : edges) {
             checkMembership(edge);
         }
@@ -73,10 +69,20 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
      * Calls {@link #checkMembership(Vertex)} for all vertexes.
      * @param vertexes Items to check.
      */
-    protected void checkMembership(final Vertex... vertexes) {
+    protected final void checkMembership(final Vertex... vertexes) {
         for (Vertex vertex : vertexes) {
             checkMembership(vertex);
         }
+    }
+
+    @Override
+    public Edge connect(Vertex pFrom, Vertex pTo, E edgeValue) {
+        checkMembership(pFrom, pTo);
+        final VertexImpl from = (VertexImpl) pFrom;
+        final VertexImpl to = (VertexImpl) pTo;
+        UnweightedEdge edge = new UnweightedEdge(from, to, this);
+        from.connect(edge);
+        return edge;
     }
 
     @Override
@@ -100,9 +106,14 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     }
 
     @Override
+    public E getEdgeValue(Edge edge) {
+        return null;
+    }
+
+    @Override
     public boolean adjacent(final Vertex from, final Vertex to) {
         checkMembership(from, to);
-        for (AbstractEdge e : ((VertexImpl) from).edges) {
+        for (UnweightedEdge e : ((VertexImpl) from).edges) {
             if (e.to == to) return true;
         }
         return false;
@@ -125,7 +136,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         checkMembership(pToRemove);
         final VertexImpl toRemove = (VertexImpl) pToRemove;
         for (VertexImpl vertex : this.vertexes) {
-            for (AbstractEdge edge : vertex.edges) {
+            for (UnweightedEdge edge : vertex.edges) {
                 if (edge.getTo() == toRemove) {
                     this.disconnect(edge);
                 }
@@ -140,10 +151,10 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         ((VertexImpl) vertex).value = newValue;
     }
 
-    protected abstract class AbstractEdge implements Edge {
+    protected class UnweightedEdge implements Edge {
 
         /** Graph this edge belongs to. */
-        protected final AbstractGraph graph;
+        protected final UnweightedGraph graph;
 
         /** Vertex where the edge points from. */
         protected final Vertex from;
@@ -152,7 +163,13 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         protected final Vertex to;
 
         @Override
-        public abstract double getWeight();
+        /**
+         * Edges have no weights. So that search algorithms still work we return 1.
+         * So every edge costs 1.
+         */
+        public double getWeight() {
+            return 1;
+        }
 
         @Override
         public Vertex getTo() {
@@ -169,7 +186,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
          * @param to Field value.
          * @param graph Field value.
          */
-        protected AbstractEdge(final Vertex from, final Vertex to, final AbstractGraph graph) {
+        protected UnweightedEdge(final Vertex from, final Vertex to, final UnweightedGraph graph) {
             this.from = from;
             this.to = to;
             this.graph = graph;
@@ -184,7 +201,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
     protected class VertexImpl implements Vertex, Comparator<VertexImpl> {
 
         /** Graph this vertex belongs to. */
-        protected final AbstractGraph graph;
+        protected final UnweightedGraph graph;
 
         /** Value of this vertex. */
         protected V value;
@@ -197,13 +214,13 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
         protected byte marked = 0;
 
         /** Edges outgoing form this vertex. */
-        protected LinkedList<AbstractEdge> edges = new LinkedList<>();
+        protected LinkedList<UnweightedEdge> edges = new LinkedList<>();
 
         /**
          * @param value Field value.
          * @param graph Field value.
          */
-        protected VertexImpl(V value, AbstractGraph graph) {
+        protected VertexImpl(V value, UnweightedGraph graph) {
             this.value = value;
             this.graph = graph;
         }
@@ -212,7 +229,7 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
          * Adds edge to edges.
          * @param edge Edge pointing from this vertex to a vertex of this graph.
          */
-        protected void connect(AbstractEdge edge) {
+        protected void connect(UnweightedEdge edge) {
             assert edge.from == this;
             this.edges.addLast(edge);
         }
@@ -271,66 +288,4 @@ public abstract class AbstractGraph<V, E> implements Graph<V, E> {
 
     }
 
-    /**
-     * Own Edge iterator implementation.
-     *
-     * <b>Idea</b>
-     * Behind the scenes iterate over all vertexes and for each vertex over his edges.
-     *
-     * <b>Note</b>
-     * To archive a iteration over all edges in O(e).
-     * If we would instead connect all vertex::edges together, we get O(v + e).
-     *
-     * Iterator.remove was not implemented. Remove edges via {@link #disconnect(Edge)}.
-     */
-    class EdgeIterable implements Iterable<Edge> {
-
-        @Override
-        public Iterator<Edge> iterator() {
-            return new EdgeIterator();
-        }
-
-        class EdgeIterator implements Iterator<Edge> {
-
-            Iterator<VertexImpl> vertexIterator;
-            Iterator<AbstractEdge> edgesIterator;
-
-            EdgeIterator() {
-                this.vertexIterator = vertexes.iterator();
-                VertexImpl v = vertexIterator.next();
-                this.edgesIterator = v.edges.iterator();
-            }
-
-            @Override
-            public boolean hasNext() {
-                if (!edgesIterator.hasNext()) {
-                    if (vertexIterator.hasNext()) {
-                        VertexImpl v = vertexIterator.next();
-                        edgesIterator = v.edges.iterator();
-                        return hasNext();
-                    }
-                    return false;
-                }
-                return true;
-            }
-
-            @Override
-            public Edge next() {
-                if (!edgesIterator.hasNext()) {
-                    if (!vertexIterator.hasNext()) {
-                        throw new NoSuchElementException();
-                    }
-                    VertexImpl v = vertexIterator.next();
-                    edgesIterator = v.edges.iterator();
-                    return next();
-                }
-                return edgesIterator.next();
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        }
-    }
 }
